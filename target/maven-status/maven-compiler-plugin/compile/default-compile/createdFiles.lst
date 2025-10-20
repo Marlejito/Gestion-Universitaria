@@ -1,0 +1,9 @@
+com\gestionuniversitaria\controller\EstudianteController.class
+com\gestionuniversitaria\GestionUniversitariaApplication.class
+com\gestionuniversitaria\controller\MateriaController.class
+com\gestionuniversitaria\model\Materia.class
+com\gestionuniversitaria\MenuActions.class
+com\gestionuniversitaria\repository\EstudianteRepository.class
+com\gestionuniversitaria\ConsoleMenu.class
+com\gestionuniversitaria\repository\MateriaRepository.class
+com\gestionuniversitaria\model\Estudiante.class
