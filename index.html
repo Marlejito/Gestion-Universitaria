@@ -252,6 +252,27 @@
             </table>
         </div>
 
+        <!-- Tabla de estudiantes registradas (actualizaciones en tiempo real) -->
+        <div class="section-container">
+            <h3>Estudiantes Registrados</h3>
+            <table id="estudiantes-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
+                        <th>Email</th>
+                        <th>Celular</th>
+                        <th>Carrera</th>
+                        <th>Promedio</th>
+                        <th>Semestre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
         <!-- Formulario para modificar información personal (solo frontend) -->
         <div class="section-container">
             <h3>Modificar Información Personal</h3>
@@ -373,6 +394,35 @@
                 cargarMaterias();
             }
         }, 3000);
+
+        // Cargar estudiantes y actualizar tabla en tiempo real
+        async function cargarEstudiantes() {
+            try {
+                const resp = await fetch('http://localhost:8080/api/estudiantes');
+                if (!resp.ok) throw new Error('no-ok');
+                const estudiantes = await resp.json();
+                const tbody = document.getElementById('estudiantes-table').querySelector('tbody');
+                tbody.innerHTML = '';
+                estudiantes.forEach(e => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${e.codigo || ''}</td>
+                        <td>${e.nombres || ''}</td>
+                        <td>${e.apellidos || ''}</td>
+                        <td>${e.email || e.correo || ''}</td>
+                        <td>${e.celular || ''}</td>
+                        <td>${e.carrera || ''}</td>
+                        <td>${e.promedioAcumulado ?? ''}</td>
+                        <td>${e.semestreActual ?? ''}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                // Silencioso: si falla el fetch, no rompemos la UI
+                // Podemos mantener una tabla vacía o mostrar placeholder
+            }
+        }
+
 
         // Renderiza la tabla de notas para el panel de admin
         function renderAdminNotas() {
