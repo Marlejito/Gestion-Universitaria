@@ -37,6 +37,23 @@ Acciones recomendadas
 - Añadir pruebas unitarias en `src/test/java` y un pipeline CI para ejecutarlas.
 - Crear ramas para nuevas características y PRs para revisiones.
 
-Contacto
 
-- Si quieres que cree una rama y haga commits o abra un PR con cambios adicionales, dímelo y lo hago.
+## Nota sobre la interfaz web e inclusión en el JAR
+
+- El archivo `index.html` ahora se incluye en el JAR bajo `src/main/resources/static/` y se sirve desde la raíz de la aplicación.
+  - Accede a la interfaz web en http://localhost:8080/ cuando la aplicación esté ejecutándose.
+
+## Limpieza de artefactos de build
+
+- Se eliminó la carpeta `target/` del índice Git para evitar subir artefactos compilados al repositorio. `target/` sigue existiendo en tu disco local cuando compiles, pero ya no se trackea.
+
+Comandos útiles:
+
+```powershell
+mvn package
+java -jar target/gestion-universitaria-1.0.0.jar --spring.profiles.active=dev
+```
+
+Si necesitas eliminar por completo los artefactos del historial (reduce el tamaño del repositorio), puedo ayudarte a ejecutar herramientas como BFG o `git filter-repo` (esto reescribe el historial y requiere coordinación).
+
+
