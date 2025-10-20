@@ -58,6 +58,47 @@ public class MenuActions {
     }
 
     /**
+     * Obtiene la lista de estudiantes desde el backend y la muestra en la consola.
+     */
+    public static void listarEstudiantes(Scanner scanner) {
+        try {
+            URI uri = URI.create("http://localhost:8080/api/estudiantes");
+            URL url = uri.toURL();
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Accept", "application/json");
+            int code = con.getResponseCode();
+            if (code == 200) {
+                try (java.io.InputStream is = con.getInputStream();
+                     java.util.Scanner s = new java.util.Scanner(is, StandardCharsets.UTF_8.name())) {
+                    String json = s.useDelimiter("\\A").hasNext() ? s.next() : "";
+                    // Simple printing: show raw JSON or try a basic formatting
+                    System.out.println("\n--- Estudiantes registrados ---");
+                    if (json.isBlank() || json.equals("[]")) {
+                        System.out.println("No hay estudiantes registrados.");
+                    } else {
+                        // Intento de formateo muy básico: separar objetos por '},{' para líneas
+                        String compact = json.trim();
+                        compact = compact.substring(1, compact.length() - 1); // quitar [ ]
+                        String[] items = compact.split("},\\s*\\{");
+                        for (String item : items) {
+                            String obj = item;
+                            if (!obj.startsWith("{")) obj = "{" + obj;
+                            if (!obj.endsWith("}")) obj = obj + "}";
+                            System.out.println(obj);
+                            System.out.println("-----------------------------");
+                        }
+                    }
+                }
+            } else {
+                System.out.println("Error al obtener estudiantes. Código: " + code);
+            }
+        } catch (java.io.IOException e) {
+            System.out.println("Error de conexión: " + e.getMessage());
+        }
+    }
+
+    /**
      * Solicita los datos de la materia por consola y los envía al backend para registrar una nueva materia.
      */
     public static void registrarMateria(Scanner scanner) {
