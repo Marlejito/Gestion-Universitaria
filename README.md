@@ -1,32 +1,42 @@
-Gestion Universitaria
-=====================
+﻿# Gestión Universitaria
 
-A small Spring Boot project for managing university data (students, subjects).
+Pequeño proyecto Spring Boot para gestionar datos universitarios (estudiantes, materias).
 
-Summary of important information
-- Java: project targets Java 21 (LTS). Tested with Oracle JDK 21.0.8.
-- Build: Maven (3.9.x). Build command: `mvn package`.
-- Run (H2 dev profile): `java -jar target/gestion-universitaria-1.0.0.jar --spring.profiles.active=dev`
-  - This uses an in-memory H2 database for local development and enables the H2 console at `/h2-console`.
-- Production / default run: `java -jar target/gestion-universitaria-1.0.0.jar`
-  - This uses the `application.properties` datasource (SQL Server by default). Ensure SQL Server is reachable or set appropriate environment variables.
+Resumen
 
-Development notes
-- The repository was cleaned up to remove duplicate top-level `.java` and `.class` files. Canonical sources live under `src/main/java`.
-- A `dev` Spring profile was added with H2 configuration in `src/main/resources/application-dev.properties` to make local runs easy without SQL Server.
-- H2 dependency added to `pom.xml` (runtime scope).
-
-How to switch databases
-- Use the `dev` profile to run against H2:
+- Java: el proyecto apunta a Java 21 (LTS). Probado con Oracle JDK 21.0.8.
+- Compilación: Maven (3.9.x). Comando para compilar: `mvn package`.
+- Ejecutar en desarrollo (perfil `dev` con H2):
 
   java -jar target/gestion-universitaria-1.0.0.jar --spring.profiles.active=dev
 
-- Use the default profile to connect to SQL Server (requires proper credentials and network access as configured in `application.properties`).
+  - Usa una base de datos H2 en memoria para desarrollo local y activa la consola H2 en `/h2-console`.
+- Ejecutar en producción / por defecto:
 
-Next recommended actions
-- Externalize secrets: remove plaintext SQL Server password from `application.properties` and use environment variables or a secret manager.
-- Add unit tests under `src/test/java` and CI pipeline to run them.
-- Create a Git branch and commit the cleanup and additions.
+  java -jar target/gestion-universitaria-1.0.0.jar
 
-Contact
-- If you want me to commit changes or open a PR, say so and I'll make a branch and commit the edits.
+  - Usa la configuración de `application.properties` (por defecto SQL Server). Asegúrate de que SQL Server esté accesible o configura las variables de entorno adecuadas.
+
+Notas de desarrollo
+
+- El repositorio fue limpiado para eliminar artefactos compilados y duplicados; el código fuente principal está en `src/main/java`.
+- Se añadió un perfil `dev` con configuración H2 en `src/main/resources/application-dev.properties` para facilitar el desarrollo local.
+- Dependencia H2 incluida en `pom.xml` con scope runtime.
+
+Cómo cambiar de base de datos
+
+- Ejecuta con el perfil `dev` para usar H2:
+
+  java -jar target/gestion-universitaria-1.0.0.jar --spring.profiles.active=dev
+
+- Ejecuta por defecto para usar SQL Server (requiere credenciales y acceso de red configurados en `application.properties`).
+
+Acciones recomendadas
+
+- Externalizar secretos: no dejar la contraseña de SQL Server en texto claro en `application.properties`; usar variables de entorno o un gestor de secretos.
+- Añadir pruebas unitarias en `src/test/java` y un pipeline CI para ejecutarlas.
+- Crear ramas para nuevas características y PRs para revisiones.
+
+Contacto
+
+- Si quieres que cree una rama y haga commits o abra un PR con cambios adicionales, dímelo y lo hago.
