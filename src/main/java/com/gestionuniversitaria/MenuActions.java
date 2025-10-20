@@ -57,6 +57,39 @@ public class MenuActions {
         }
     }
 
+    // Extra helpers for simple JSON parsing and safe truncation
+    private static String extractJsonField(String jsonObj, String fieldName) {
+        try {
+            String key = '"' + fieldName + '"' + ':';
+            int idx = jsonObj.indexOf(key);
+            if (idx == -1) return "";
+            int start = idx + key.length();
+            // skip whitespace
+            while (start < jsonObj.length() && Character.isWhitespace(jsonObj.charAt(start))) start++;
+            char c = jsonObj.charAt(start);
+            if (c == '"') {
+                start++;
+                int end = jsonObj.indexOf('"', start);
+                if (end == -1) end = jsonObj.length();
+                return jsonObj.substring(start, end);
+            } else {
+                // number or boolean
+                int end = start;
+                while (end < jsonObj.length() && ",} ".indexOf(jsonObj.charAt(end))==-1) end++;
+                return jsonObj.substring(start, end).trim();
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static String safeTruncate(String s, int len) {
+        if (s == null) return "";
+        String out = s.replaceAll("\n", " ").replaceAll("\r", " ");
+        if (out.length() <= len) return out;
+        return out.substring(0, len-3) + "...";
+    }
+
     /**
      * Obtiene la lista de estudiantes desde el backend y la muestra en la consola.
      */
@@ -73,20 +106,35 @@ public class MenuActions {
                      java.util.Scanner s = new java.util.Scanner(is, StandardCharsets.UTF_8.name())) {
                     String json = s.useDelimiter("\\A").hasNext() ? s.next() : "";
                     // Simple printing: show raw JSON or try a basic formatting
-                    System.out.println("\n--- Estudiantes registrados ---");
+                    System.out.println("\n--- Estudiantes registrados ---\n");
                     if (json.isBlank() || json.equals("[]")) {
                         System.out.println("No hay estudiantes registrados.");
                     } else {
-                        // Intento de formateo muy básico: separar objetos por '},{' para líneas
+                        // Parseo muy simple del JSON para extraer campos clave sin dependencias
                         String compact = json.trim();
                         compact = compact.substring(1, compact.length() - 1); // quitar [ ]
                         String[] items = compact.split("},\\s*\\{");
+
+                        // Encabezado de tabla
+                        String fmt = "%-10s | %-15s | %-15s | %-25s | %-15s | %-8s | %-8s";
+                        System.out.println(String.format(fmt, "Código", "Nombres", "Apellidos", "Email", "Carrera", "Promedio", "Semestre"));
+                        System.out.println(new String(new char[110]).replace('\0','-'));
+
                         for (String item : items) {
                             String obj = item;
                             if (!obj.startsWith("{")) obj = "{" + obj;
                             if (!obj.endsWith("}")) obj = obj + "}";
-                            System.out.println(obj);
-                            System.out.println("-----------------------------");
+
+                            String codigo = extractJsonField(obj, "codigo");
+                            String nombres = extractJsonField(obj, "nombres");
+                            String apellidos = extractJsonField(obj, "apellidos");
+                            String email = extractJsonField(obj, "email");
+                            String carrera = extractJsonField(obj, "carrera");
+                            String promedio = extractJsonField(obj, "promedioAcumulado");
+                            String semestre = extractJsonField(obj, "semestreActual");
+
+                            System.out.println(String.format(fmt,
+                                safeTruncate(codigo,10), safeTruncate(nombres,15), safeTruncate(apellidos,15), safeTruncate(email,25), safeTruncate(carrera,15), safeTruncate(promedio,8), safeTruncate(semestre,8)));
                         }
                     }
                 }

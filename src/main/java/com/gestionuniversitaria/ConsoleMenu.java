@@ -14,14 +14,17 @@ public class ConsoleMenu {
             System.out.println("\n--- Menú de Gestión Universitaria ---");
             System.out.println("1. Registrar estudiante");
             System.out.println("2. Registrar materia");
-            System.out.println("3. Listar estudiantes");
+            System.out.println("3. Estudiantes Registrados");
             System.out.println("4. Salir");
             System.out.print("Seleccione una opción: ");
             String opcion = scanner.nextLine();
             switch (opcion) {
                 case "1" -> MenuActions.registrarEstudiante(scanner);
                 case "2" -> MenuActions.registrarMateria(scanner);
-                case "3" -> MenuActions.listarEstudiantes(scanner);
+                case "3" -> {
+                    System.out.println("\n=== Estudiantes Registrados ===");
+                    MenuActions.listarEstudiantes(scanner);
+                }
                 case "4" -> {
                     System.out.println("Saliendo...");
                     return;

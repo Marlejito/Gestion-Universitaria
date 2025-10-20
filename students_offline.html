@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Estudiantes - Offline Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px
+        }
+
+        th {
+            background: #f4f4f4
+        }
+
+        .muted {
+            color: #666;
+            font-size: 0.9em
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Estudiantes Registrados (Offline)</h1>
+    <p class="muted">Este visor intentará cargar los datos desde <code>/api/estudiantes</code>. Si el backend no está
+        disponible, se muestran datos de ejemplo.</p>
+    <table id="students">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Email</th>
+                <th>Carrera</th>
+                <th>Promedio</th>
+                <th>Semestre</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+        const sample = [
+            { codigo: 'A001', nombres: 'Juan', apellidos: 'Pérez', email: 'juan.perez@example.com', carrera: 'Ing. Sistemas', promedio: 8.5, semestre: 6 },
+            { codigo: 'A002', nombres: 'María', apellidos: 'González', email: 'maria.g@example.com', carrera: 'Derecho', promedio: 9.1, semestre: 5 }
+        ];
+
+        function render(arr) {
+            const tb = document.querySelector('#students tbody'); tb.innerHTML = '';
+            arr.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${s.codigo || ''}</td><td>${s.nombres || ''}</td><td>${s.apellidos || ''}</td><td>${s.email || ''}</td><td>${s.carrera || ''}</td><td>${s.promedio || ''}</td><td>${s.semestre || ''}</td>`;
+                tb.appendChild(tr);
+            });
+        }
+
+        fetch('/api/estudiantes').then(r => r.ok ? r.json() : Promise.reject('no data')).then(render).catch(e => {
+            console.log('No API, using sample', e);
+            render(sample);
+        });
+    </script>
+</body>
+
+</html>
