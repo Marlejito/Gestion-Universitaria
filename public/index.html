@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><title>Gestión Universitaria</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body { padding: 20px; background: #f8f9fa; }
+    .tab-pane { display: none; animation: fadeIn 0.3s; }
+    .active { display: block; }
+    @keyframes fadeIn { from {opacity:0} to {opacity:1} }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center text-primary mb-4">Sistema Universitario</h2>
+    <div class="nav nav-pills mb-3 justify-content-center" id="menu">
+        <button class="nav-link active" onclick="ver('estudiantes')">Estudiantes</button>
+        <button class="nav-link" onclick="ver('profesores')">Profesores</button>
+        <button class="nav-link" onclick="ver('cursos')">Cursos</button>
+        <button class="nav-link" onclick="ver('inscripciones')">Inscripciones</button>
+        <button class="nav-link" onclick="ver('calificaciones')">Calificaciones</button>
+        <button class="nav-link" onclick="ver('boletin')">Boletín</button>
+        <button class="nav-link" onclick="ver('reportes')">Reportes</button>
+    </div>
+
+    <div id="estudiantes" class="tab-pane active">
+        <div class="card p-3 mb-3">
+            <form onsubmit="apiPost('estudiantes', {nombre: val('eNom'), email: val('eMail')}, renderEst); return false">
+                <div class="input-group"><input id="eNom" class="form-control" placeholder="Nombre" required>
+                <input id="eMail" class="form-control" placeholder="Email" required><button class="btn btn-primary">Crear</button></div>
+            </form>
+        </div>
+        <table class="table bg-white"><thead><tr><th>Nombre</th><th>Email</th><th>Accion</th></tr></thead><tbody id="tEst"></tbody></table>
+    </div>
+
+    <div id="profesores" class="tab-pane">
+        <div class="card p-3 mb-3">
+            <form onsubmit="apiPost('profesores', {nombre: val('pNom'), especialidad: val('pEsp')}, renderProf); return false">
+                <div class="input-group"><input id="pNom" class="form-control" placeholder="Nombre" required>
+                <input id="pEsp" class="form-control" placeholder="Especialidad" required><button class="btn btn-primary">Crear</button></div>
+            </form>
+        </div>
+        <table class="table bg-white"><thead><tr><th>Nombre</th><th>Especialidad</th><th>Accion</th></tr></thead><tbody id="tProf"></tbody></table>
+    </div>
+
+    <div id="cursos" class="tab-pane">
+        <div class="card p-3 mb-3">
+            <h6>Nuevo Curso con Ponderación (Suma 100%)</h6>
+            <form onsubmit="crearCurso(event)">
+                <div class="row g-2">
+                    <div class="col-4"><input id="cNom" class="form-control" placeholder="Nombre Curso" required></div>
+                    <div class="col-3"><input id="cProf" class="form-control" placeholder="ID Profesor" required></div>
+                    <div class="col-1"><input id="cp1" type="number" class="form-control" placeholder="% C1" value="30" required></div>
+                    <div class="col-1"><input id="cp2" type="number" class="form-control" placeholder="% C2" value="30" required></div>
+                    <div class="col-1"><input id="cp3" type="number" class="form-control" placeholder="% C3" value="40" required></div>
+                    <div class="col-2"><button class="btn btn-primary w-100">Crear</button></div>
+                </div>
+            </form>
+        </div>
+        <table class="table bg-white"><thead><tr><th>Curso</th><th>Profesor ID</th><th>% Cortes</th><th>Accion</th></tr></thead><tbody id="tCur"></tbody></table>
+    </div>
+
+    <div id="inscripciones" class="tab-pane">
+        <div class="card p-3 mb-3">
+            <form onsubmit="apiPost('inscripciones', {estudianteId: val('iEst'), cursoId: val('iCur')}, renderIns); return false">
+                <div class="input-group">
+                    <select id="iEst" class="form-select" required></select>
+                    <select id="iCur" class="form-select" required></select>
+                    <button class="btn btn-success">Inscribir</button>
+                </div>
+            </form>
+        </div>
+        <table class="table bg-white"><thead><tr><th>Estudiante</th><th>Materias</th></tr></thead><tbody id="tIns"></tbody></table>
+    </div>
+
+    <div id="calificaciones" class="tab-pane">
+        <div class="card p-3 mb-3">
+            <form onsubmit="apiPost('calificaciones', {inscripcionId: val('caIns'), corte: parseInt(val('caCor')), nota: parseFloat(val('caNot'))}, renderCal); return false">
+                <div class="input-group">
+                    <select id="caIns" class="form-select" required></select>
+                    <select id="caCor" class="form-select" style="max-width: 120px;" required>
+                        <option value="1">Corte 1</option><option value="2">Corte 2</option><option value="3">Corte 3</option>
+                    </select>
+                    <input id="caNot" type="number" step="0.1" min="0" max="5" class="form-control" placeholder="Nota" required>
+                    <button class="btn btn-warning">Calificar</button>
+                </div>
+            </form>
+        </div>
+        <table class="table bg-white"><thead><tr><th>Inscripcion ID</th><th>Corte</th><th>Nota</th></tr></thead><tbody id="tCal"></tbody></table>
+    </div>
+
+    <div id="boletin" class="tab-pane">
+        <div class="card p-3 mb-3">
+            <div class="input-group">
+                <select id="bEst" class="form-select" onchange="renderBoletin()"></select>
+                <button class="btn btn-info" onclick="renderBoletin()">Ver Notas</button>
+            </div>
+        </div>
+        <table class="table bg-white table-bordered">
+            <thead class="table-dark">
+                <tr><th>Materia</th><th>Corte 1</th><th>Corte 2</th><th>Corte 3</th><th>Definitiva</th></tr>
+            </thead>
+            <tbody id="tBol"></tbody>
+        </table>
+    </div>
+
+    <div id="reportes" class="tab-pane text-center">
+        <div class="card p-5"><h3 id="repData">Cargando...</h3></div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:7000/api/';
+const val = id => document.getElementById(id).value;
+const setH = (id, h) => document.getElementById(id).innerHTML = h;
+
+function ver(id) {
+    document.querySelectorAll('.tab-pane').forEach(e => e.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(e => e.classList.remove('active'));
+    event.target.classList.add('active');
+    if(id==='estudiantes') renderEst();
+    if(id==='profesores') renderProf();
+    if(id==='cursos') renderCur();
+    if(id==='inscripciones') renderIns();
+    if(id==='calificaciones') renderCal();
+    if(id==='boletin') loadBoletinSelect();
+    if(id==='reportes') renderRep();
+}
+
+async function fetchJson(ep) { return (await fetch(API+ep)).json(); }
+async function apiPost(ep, data, cb) {
+    const r = await fetch(API+ep, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    if(!r.ok) alert(await r.text()); else { cb(); document.querySelectorAll('form').forEach(f=>f.reset()); }
+}
+async function apiDel(ep, id, cb) { if(confirm('Borrar?')) { await fetch(API+ep+'/'+id, {method:'DELETE'}); cb(); } }
+
+async function renderEst() {
+    const d = await fetchJson('estudiantes');
+    setH('tEst', d.map(e => `<tr><td>${e.nombre}</td><td>${e.email}</td><td><button class="btn btn-sm btn-danger" onclick="apiDel('estudiantes','${e.id}',renderEst)">X</button></td></tr>`).join(''));
+}
+async function renderProf() {
+    const d = await fetchJson('profesores');
+    setH('tProf', d.map(e => `<tr><td>${e.nombre}</td><td>${e.especialidad}</td><td><button class="btn btn-sm btn-danger" onclick="apiDel('profesores','${e.id}',renderProf)">X</button></td></tr>`).join(''));
+}
+async function renderCur() {
+    const d = await fetchJson('cursos');
+    setH('tCur', d.map(e => `<tr><td>${e.nombre}</td><td>${e.profesorId}</td><td>${e.p1}% - ${e.p2}% - ${e.p3}%</td><td><button class="btn btn-sm btn-danger" onclick="apiDel('cursos','${e.id}',renderCur)">X</button></td></tr>`).join(''));
+}
+async function crearCurso(e) {
+    e.preventDefault();
+    const data = {
+        nombre: val('cNom'), profesorId: val('cProf'),
+        p1: parseInt(val('cp1')), p2: parseInt(val('cp2')), p3: parseInt(val('cp3'))
+    };
+    apiPost('cursos', data, renderCur);
+}
+
+async function renderIns() {
+    const [est, cur, ins] = await Promise.all([fetchJson('estudiantes'), fetchJson('cursos'), fetchJson('inscripciones')]);
+    setH('iEst', '<option value="">Estudiante...</option>' + est.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join(''));
+    setH('iCur', '<option value="">Curso...</option>' + cur.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join(''));
+    
+    const mapC = {}; cur.forEach(c => mapC[c.id] = c.nombre);
+    const mapE = {}; est.forEach(e => mapE[e.id] = {n:e.nombre, c:[]});
+    ins.forEach(i => { if(mapE[i.estudianteId]) mapE[i.estudianteId].c.push(mapC[i.cursoId]); });
+    setH('tIns', Object.values(mapE).map(e => `<tr><td>${e.n}</td><td>${e.c.join(', ') || '-'}</td></tr>`).join(''));
+}
+async function renderCal() {
+    const [ins, cal, est, cur] = await Promise.all([fetchJson('inscripciones'), fetchJson('calificaciones'), fetchJson('estudiantes'), fetchJson('cursos')]);
+    const nE = {}; est.forEach(e=>nE[e.id]=e.nombre);
+    const nC = {}; cur.forEach(c=>nC[c.id]=c.nombre);
+    setH('caIns', '<option value="">Inscripcion...</option>' + ins.map(i=>`<option value="${i.id}">${nE[i.estudianteId]||'?'} - ${nC[i.cursoId]||'?'}</option>`).join(''));
+    setH('tCal', cal.map(c => `<tr><td>${c.inscripcionId}</td><td>${c.corte}</td><td>${c.nota}</td></tr>`).join(''));
+}
+
+async function loadBoletinSelect() {
+    const d = await fetchJson('estudiantes');
+    setH('bEst', '<option value="">Seleccione Estudiante para ver Boletín...</option>' + d.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join(''));
+}
+
+async function renderBoletin() {
+    const id = val('bEst');
+    if(!id) return;
+    const data = await fetchJson('boletin/'+id);
+    
+    setH('tBol', data.map(r => `
+        <tr>
+            <td>${r.curso}</td>
+            <td><span class="badge bg-secondary">${r.p1}%</span> <b>${r.nota1}</b></td>
+            <td><span class="badge bg-secondary">${r.p2}%</span> <b>${r.nota2}</b></td>
+            <td><span class="badge bg-secondary">${r.p3}%</span> <b>${r.nota3}</b></td>
+            <td class="${r.definitiva < 3.0 ? 'text-danger' : 'text-success'} fw-bold">${r.definitiva}</td>
+        </tr>
+    `).join(''));
+}
+
+async function renderRep() {
+    const d = await fetchJson('reporte/resumen');
+    setH('repData', `Est: ${d.totalEstudiantes} | Prof: ${d.totalProfesores} | Cur: ${d.totalCursos} | Ins: ${d.totalInscripciones}`);
+}
+renderEst();
+</script>
+</body>
+</html>
