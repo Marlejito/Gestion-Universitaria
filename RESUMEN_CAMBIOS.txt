@@ -1,0 +1,41 @@
+RESUMEN DE CAMBIOS Y MEJORAS DEL PROYECTO GESTIÓN UNIVERSITARIA
+
+1. REESTRUCTURACIÓN
+   - Se migró el proyecto a una estructura Maven estándar (src/main/java, src/main/resources).
+   - Se eliminó la dependencia de archivos temporales o estructuras antiguas desordenadas.
+   - Se configuró el pom.xml para generar un ejecutable limpio (versión 1.0) sin sufijos SNAPSHOT.
+
+2. BACKEND (JAVA + JAVALIN)
+   - Implementación de Arquitectura MVC (Model-View-Controller) centralizada.
+   - Creación de Modelos como Records (Java 14+) para un código más conciso y seguro: Estudiante, Profesor, Curso, Inscripcion, Calificacion, Usuario.
+   - Sistema de Persistencia JSON: Se creó la clase DataStore que guarda automáticamente todos los datos en 'data.json', asegurando que la información no se pierda al cerrar el servidor.
+   - Controladores Robustos: 
+     - Validación estricta de datos (emails, campos vacíos, rangos de notas).
+     - Manejo centralizado de errores HTTP.
+     - Nuevos endpoints para actualización (PUT) de estudiantes y cursos.
+
+3. SEGURIDAD Y AUTENTICACIÓN
+   - Se implementó un sistema de Login.
+   - Se creó un usuario administrador por defecto que se genera automáticamente.
+   - El Frontend verifica la existencia de un token (simulado) antes de mostrar la interfaz de gestión.
+
+4. FRONTEND (HTML5 + JAVASCRIPT MODERN)
+   - Conversión a SPA (Single Page Application): La página no se recarga al navegar entre pestañas.
+   - Interfaz Gráfica Mejorada con Bootstrap 5.
+   - Funcionalidades Nuevas:
+     - Pantalla de Login inicial.
+     - Modales y formularios para EDITAR estudiantes y cursos (antes solo se podía crear/borrar).
+     - Gestión de Notas por Cortes (1, 2 y 3) con validación de porcentajes.
+     - Generación de Boletines automáticos con cálculo de nota definitiva ponderada.
+     - Botones para eliminar registros específicos (inscripciones erróneas, notas mal cargadas).
+
+5. CREDENCIALES DE ACCESO
+   Para ingresar al sistema, utilice las siguientes credenciales por defecto:
+   
+   Usuario:    admin
+   Contraseña: admin123
+
+6. CÓMO EJECUTAR
+   1. Compilar: mvn clean package
+   2. Ejecutar: java -jar target/gestion-universitaria-1.0.jar
+   3. Navegar a: http://localhost:7000
