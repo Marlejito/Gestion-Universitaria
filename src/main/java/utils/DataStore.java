@@ -14,17 +14,28 @@ public class DataStore {
     public List<Curso> cursos = new ArrayList<>();
     public List<Inscripcion> inscripciones = new ArrayList<>();
     public List<Calificacion> calificaciones = new ArrayList<>();
+    public List<Usuario> usuarios = new ArrayList<>();
 
-    private DataStore() { load(); }
+    private DataStore() { load(); seed(); }
     public static DataStore get() { return INSTANCE; }
+
+    private void seed() {
+        if(usuarios.isEmpty()) {
+            usuarios.add(new Usuario("admin", "admin123", "ADMIN"));
+            save();
+        }
+    }
 
     public void load() {
         if (!file.exists()) return;
         try {
             DataStore temp = mapper.readValue(file, DataStore.class);
-            estudiantes = temp.estudiantes; profesores = temp.profesores;
-            cursos = temp.cursos; inscripciones = temp.inscripciones;
-            calificaciones = temp.calificaciones;
+            estudiantes = temp.estudiantes != null ? temp.estudiantes : new ArrayList<>();
+            profesores = temp.profesores != null ? temp.profesores : new ArrayList<>();
+            cursos = temp.cursos != null ? temp.cursos : new ArrayList<>();
+            inscripciones = temp.inscripciones != null ? temp.inscripciones : new ArrayList<>();
+            calificaciones = temp.calificaciones != null ? temp.calificaciones : new ArrayList<>();
+            usuarios = temp.usuarios != null ? temp.usuarios : new ArrayList<>();
         } catch (Exception e) { e.printStackTrace(); }
     }
 
