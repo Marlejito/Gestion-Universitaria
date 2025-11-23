@@ -28,9 +28,11 @@ public class Main {
 
         app.get("/api/inscripciones", Controlador::getIns);
         app.post("/api/inscripciones", Controlador::addIns);
+        app.delete("/api/inscripciones/{id}", Controlador::delIns);
 
         app.get("/api/calificaciones", Controlador::getCal);
         app.post("/api/calificaciones", Controlador::addCal);
+        app.delete("/api/calificaciones/{id}", Controlador::delCal);
         
         app.get("/api/boletin/{id}", Controlador::getBoletin);
 

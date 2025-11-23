@@ -86,7 +86,7 @@
                 </div>
             </form>
         </div>
-        <table class="table bg-white"><thead><tr><th>Inscripcion ID</th><th>Corte</th><th>Nota</th></tr></thead><tbody id="tCal"></tbody></table>
+        <table class="table bg-white"><thead><tr><th>Inscripcion ID</th><th>Corte</th><th>Nota</th><th>Accion</th></tr></thead><tbody id="tCal"></tbody></table>
     </div>
 
     <div id="boletin" class="tab-pane">
@@ -163,15 +163,27 @@ async function renderIns() {
     
     const mapC = {}; cur.forEach(c => mapC[c.id] = c.nombre);
     const mapE = {}; est.forEach(e => mapE[e.id] = {n:e.nombre, c:[]});
-    ins.forEach(i => { if(mapE[i.estudianteId]) mapE[i.estudianteId].c.push(mapC[i.cursoId]); });
-    setH('tIns', Object.values(mapE).map(e => `<tr><td>${e.n}</td><td>${e.c.join(', ') || '-'}</td></tr>`).join(''));
+    ins.forEach(i => { 
+        if(mapE[i.estudianteId]) {
+            mapE[i.estudianteId].c.push({id: i.id, n: mapC[i.cursoId]}); 
+        }
+    });
+    
+    setH('tIns', Object.values(mapE).map(e => 
+        `<tr>
+            <td>${e.n}</td>
+            <td>${e.c.map(c => 
+                `<span class="badge bg-info text-dark">${c.n} <a href="#" class="text-danger text-decoration-none" onclick="apiDel('inscripciones','${c.id}',renderIns)">×</a></span>`
+            ).join(' ') || '-'}</td>
+        </tr>`
+    ).join(''));
 }
 async function renderCal() {
     const [ins, cal, est, cur] = await Promise.all([fetchJson('inscripciones'), fetchJson('calificaciones'), fetchJson('estudiantes'), fetchJson('cursos')]);
     const nE = {}; est.forEach(e=>nE[e.id]=e.nombre);
     const nC = {}; cur.forEach(c=>nC[c.id]=c.nombre);
     setH('caIns', '<option value="">Inscripcion...</option>' + ins.map(i=>`<option value="${i.id}">${nE[i.estudianteId]||'?'} - ${nC[i.cursoId]||'?'}</option>`).join(''));
-    setH('tCal', cal.map(c => `<tr><td>${c.inscripcionId}</td><td>${c.corte}</td><td>${c.nota}</td></tr>`).join(''));
+    setH('tCal', cal.map(c => `<tr><td>${c.inscripcionId}</td><td>${c.corte}</td><td>${c.nota}</td><td><button class="btn btn-sm btn-danger" onclick="apiDel('calificaciones','${c.id}',renderCal)">X</button></td></tr>`).join(''));
 }
 
 async function loadBoletinSelect() {

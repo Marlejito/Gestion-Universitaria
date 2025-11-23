@@ -1,5 +1,8 @@
 package controllers;
 
+import java.util.Map;
+import java.util.UUID;
+
 import io.javalin.http.Context;
 import models.Calificacion;
 import models.Curso;
@@ -8,8 +11,6 @@ import models.Inscripcion;
 import models.Profesor;
 import utils.DataStore;
 import utils.Validador;
-import java.util.UUID;
-import java.util.Map;
 
 public class Controlador {
     private static final DataStore db = DataStore.get();
@@ -74,6 +75,7 @@ public class Controlador {
             db.inscripciones.add(n); ok(ctx, n);
         });
     }
+    public static void delIns(Context ctx) { db.inscripciones.removeIf(x -> x.id().equals(ctx.pathParam("id"))); db.save(); ctx.status(204); }
 
     // Calificaciones
     public static void getCal(Context ctx) { ctx.json(db.calificaciones); }
@@ -88,16 +90,17 @@ public class Controlador {
             db.calificaciones.add(n); ok(ctx, n);
         });
     }
+    public static void delCal(Context ctx) { db.calificaciones.removeIf(x -> x.id().equals(ctx.pathParam("id"))); db.save(); ctx.status(204); }
     
-    // Boletin / Notas por Estudiante
+    // Boletin por Estudiante
     public static void getBoletin(Context ctx) {
         String estId = ctx.pathParam("id");
-        // Buscamos inscripciones del estudiante
+        // Buscar inscripciones del estudiante
         var misInscripciones = db.inscripciones.stream()
                 .filter(i -> i.estudianteId().equals(estId))
                 .toList();
         
-        // Construimos el reporte
+        // Construccion de reporte
         var reporte = misInscripciones.stream().map(ins -> {
             var curso = db.cursos.stream().filter(c -> c.id().equals(ins.cursoId())).findFirst().orElse(null);
             if (curso == null) return null;
