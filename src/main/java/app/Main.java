@@ -1,3 +1,5 @@
+package app;
+
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import controllers.Controlador;
