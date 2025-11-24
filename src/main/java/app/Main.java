@@ -1,7 +1,6 @@
 package app;
 
 import io.javalin.Javalin;
-import io.javalin.http.staticfiles.Location;
 import controllers.*;
 import utils.DataStore;
 import java.util.Properties;
@@ -11,7 +10,6 @@ public class Main {
         DataStore.get(); // Inicializar Base de Datos
 
         Javalin app = Javalin.create(c -> {
-            c.staticFiles.add("/public", Location.CLASSPATH);
             c.plugins.enableCors(cors -> cors.add(it -> it.anyHost()));
         }).start(7000);
 
@@ -25,31 +23,36 @@ public class Main {
         app.post("/api/login", AuthController::login);
 
         // --- Estudiantes ---
-        app.get("/api/estudiantes", EstudianteController::getAll);
-        app.post("/api/estudiantes", EstudianteController::create);
-        app.put("/api/estudiantes/{id}", EstudianteController::update);
-        app.delete("/api/estudiantes/{id}", EstudianteController::delete);
+        app.get("/api/students", EstudianteController::getAll);
+        app.post("/api/students", EstudianteController::create);
+        app.patch("/api/students/{id}", EstudianteController::update);
+        app.delete("/api/students/{id}", EstudianteController::delete);
 
         // --- Profesores ---
-        app.get("/api/profesores", ProfesorController::getAll);
-        app.post("/api/profesores", ProfesorController::create);
-        app.delete("/api/profesores/{id}", ProfesorController::delete);
+        app.get("/api/professors", ProfesorController::getAll);
+        app.post("/api/professors", ProfesorController::create);
+        app.patch("/api/professors/{id}", ProfesorController::update);
+        app.delete("/api/professors/{id}", ProfesorController::delete);
 
         // --- Cursos ---
-        app.get("/api/cursos", CursoController::getAll);
-        app.post("/api/cursos", CursoController::create);
-        app.put("/api/cursos/{id}", CursoController::update);
-        app.delete("/api/cursos/{id}", CursoController::delete);
+        app.get("/api/courses", CursoController::getAll);
+        app.post("/api/courses", CursoController::create);
+        app.patch("/api/courses/{id}", CursoController::update);
+        app.delete("/api/courses/{id}", CursoController::delete);
 
-        // --- Otros ---
-        app.get("/api/inscripciones", InscripcionController::getAll);
-        app.post("/api/inscripciones", InscripcionController::create);
-        app.delete("/api/inscripciones/{id}", InscripcionController::delete);
+        // --- Inscripciones ---
+        app.get("/api/enrollments", InscripcionController::getAll);
+        app.post("/api/enrollments", InscripcionController::create);
+        app.patch("/api/enrollments/{id}", InscripcionController::update);
+        app.delete("/api/enrollments/{id}", InscripcionController::delete);
 
-        app.get("/api/calificaciones", CalificacionController::getAll);
-        app.post("/api/calificaciones", CalificacionController::create);
-        app.delete("/api/calificaciones/{id}", CalificacionController::delete);
+        // --- Calificaciones ---
+        app.get("/api/grades", CalificacionController::getAll);
+        app.post("/api/grades", CalificacionController::create);
+        app.patch("/api/grades/{id}", CalificacionController::update);
+        app.delete("/api/grades/{id}", CalificacionController::delete);
 
+        // --- Reportes ---
         app.get("/api/boletin/{id}", ReporteController::getBoletin);
         app.get("/api/reporte/resumen", ReporteController::resumen);
 

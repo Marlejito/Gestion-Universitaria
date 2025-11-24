@@ -17,8 +17,20 @@ public class EstudianteController {
         try {
             Estudiante b = ctx.bodyAsClass(Estudiante.class);
             Validador.require(Validador.texto(b.nombre()), "Nombre requerido");
+            Validador.require(Validador.texto(b.apellido()), "Apellido requerido");
             Validador.require(Validador.email(b.email()), "Email inválido");
-            Estudiante nuevo = new Estudiante(UUID.randomUUID().toString(), b.nombre(), b.email());
+
+            Estudiante nuevo = new Estudiante(
+                    UUID.randomUUID().toString(),
+                    b.codigoEstudiante(),
+                    b.nombre(),
+                    b.apellido(),
+                    b.email(),
+                    b.telefono(),
+                    b.programa(),
+                    b.semestre(),
+                    b.status() != null ? b.status() : "activo");
+
             db.estudiantes.put(nuevo.id(), nuevo);
             ctx.status(201).json(nuevo);
             db.save();
@@ -35,7 +47,17 @@ public class EstudianteController {
             if (!db.estudiantes.containsKey(id))
                 throw new IllegalArgumentException("Estudiante no encontrado");
 
-            Estudiante updated = new Estudiante(id, b.nombre(), b.email());
+            Estudiante updated = new Estudiante(
+                    id,
+                    b.codigoEstudiante(),
+                    b.nombre(),
+                    b.apellido(),
+                    b.email(),
+                    b.telefono(),
+                    b.programa(),
+                    b.semestre(),
+                    b.status());
+
             db.estudiantes.put(id, updated);
             ctx.json(updated);
             db.save();

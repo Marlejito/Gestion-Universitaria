@@ -3,7 +3,6 @@ package controllers;
 import io.javalin.http.Context;
 import models.Inscripcion;
 import utils.DataStore;
-import utils.Validador;
 import java.util.UUID;
 
 public class InscripcionController {
@@ -16,14 +15,39 @@ public class InscripcionController {
     public static void create(Context ctx) {
         try {
             Inscripcion b = ctx.bodyAsClass(Inscripcion.class);
-            Validador.require(Validador.texto(b.estudianteId()) && Validador.texto(b.cursoId()), "Datos requeridos");
-            boolean existe = db.inscripciones.values().stream()
-                    .anyMatch(i -> i.estudianteId().equals(b.estudianteId()) && i.cursoId().equals(b.cursoId()));
-            Validador.require(!existe, "El estudiante ya está inscrito en este curso");
 
-            Inscripcion n = new Inscripcion(UUID.randomUUID().toString(), b.estudianteId(), b.cursoId());
-            db.inscripciones.put(n.id(), n);
-            ctx.status(201).json(n);
+            Inscripcion nuevo = new Inscripcion(
+                    UUID.randomUUID().toString(),
+                    b.estudianteId(),
+                    b.cursoId(),
+                    b.semestre(),
+                    b.status() != null ? b.status() : "inscrito");
+
+            db.inscripciones.put(nuevo.id(), nuevo);
+            ctx.status(201).json(nuevo);
+            db.save();
+            Controlador.broadcast("UPDATE");
+        } catch (IllegalArgumentException e) {
+            ctx.status(400).result(e.getMessage());
+        }
+    }
+
+    public static void update(Context ctx) {
+        try {
+            String id = ctx.pathParam("id");
+            Inscripcion b = ctx.bodyAsClass(Inscripcion.class);
+            if (!db.inscripciones.containsKey(id))
+                throw new IllegalArgumentException("Inscripción no encontrada");
+
+            Inscripcion updated = new Inscripcion(
+                    id,
+                    b.estudianteId(),
+                    b.cursoId(),
+                    b.semestre(),
+                    b.status());
+
+            db.inscripciones.put(id, updated);
+            ctx.json(updated);
             db.save();
             Controlador.broadcast("UPDATE");
         } catch (IllegalArgumentException e) {

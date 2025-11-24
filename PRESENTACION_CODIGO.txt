@@ -1,0 +1,1345 @@
+================================================================================
+    PRESENTACIÓN DEL CÓDIGO - SISTEMA DE GESTIÓN UNIVERSITARIA
+================================================================================
+
+ÍNDICE
+------
+1. Descripción General del Sistema
+2. Arquitectura y Flujo de Datos
+3. Backend - Java
+4. Frontend - React + TypeScript
+5. Comunicación Frontend-Backend
+6. Sistema de Calificaciones Colombiano
+7. Base de Datos y Persistencia
+8. Funcionalidades Principales
+9. Ejemplos de Código Importantes
+
+================================================================================
+1. DESCRIPCIÓN GENERAL DEL SISTEMA
+================================================================================
+
+El Sistema de Gestión Universitaria es una aplicación web full-stack que permite
+administrar estudiantes, profesores, cursos, inscripciones y calificaciones en
+una institución educativa.
+
+CARACTERÍSTICAS CLAVE:
+- Interfaz completamente en español
+- Sistema de calificaciones colombiano (escala 1.0-5.0)
+- Actualizaciones en tiempo real con WebSockets
+- Diseño responsivo con modo claro/oscuro
+- API REST completa
+- Persistencia en JSON
+
+TECNOLOGÍAS:
+- Backend: Java 17 + Javalin 5.6
+- Frontend: React 18 + TypeScript + Tailwind CSS
+- Base de Datos: JSON (data.json)
+- Comunicación: REST API + WebSockets
+
+================================================================================
+2. ARQUITECTURA Y FLUJO DE DATOS
+================================================================================
+
+ARQUITECTURA DE 3 CAPAS:
+
+┌─────────────────────────────────────────────────────────────┐
+│                    CAPA DE PRESENTACIÓN                      │
+│  React + TypeScript + Tailwind CSS (Puerto 5173 en dev)     │
+│  - Componentes UI (shadcn/ui)                                │
+│  - Gestión de estado (React Query)                           │
+│  - Formularios (React Hook Form + Zod)                       │
+│  - Routing (Wouter)                                          │
+└─────────────────────────────────────────────────────────────┘
+                            ↕ HTTP/REST + WebSocket
+┌─────────────────────────────────────────────────────────────┐
+│                    CAPA DE APLICACIÓN                        │
+│  Java + Javalin (Puerto 7000)                                │
+│  - Controladores REST (6 controladores)                      │
+│  - Validación de datos                                       │
+│  - Lógica de negocio                                         │
+│  - WebSocket para tiempo real                                │
+└─────────────────────────────────────────────────────────────┘
+                            ↕ Lectura/Escritura
+┌─────────────────────────────────────────────────────────────┐
+│                    CAPA DE DATOS                             │
+│  DataStore (JSON + ConcurrentHashMap)                        │
+│  - Persistencia en data.json                                 │
+│  - Caché en memoria para rendimiento                         │
+│  - Sincronización automática                                 │
+└─────────────────────────────────────────────────────────────┘
+
+FLUJO DE DATOS TÍPICO:
+
+1. Usuario interactúa con la UI (React)
+2. Componente React dispara una acción (ej: crear estudiante)
+3. React Query envía petición HTTP al backend
+4. Javalin recibe la petición y la enruta al controlador apropiado
+5. Controlador valida los datos
+6. DataStore actualiza el caché en memoria
+7. DataStore persiste los cambios en data.json
+8. Controlador envía respuesta al frontend
+9. React Query actualiza el estado local
+10. UI se re-renderiza con los nuevos datos
+11. WebSocket notifica a otros clientes conectados (tiempo real)
+
+================================================================================
+3. BACKEND - JAVA
+================================================================================
+
+3.1 PUNTO DE ENTRADA - Main.java
+---------------------------------
+
+Ubicación: src/main/java/app/Main.java
+
+CÓDIGO PRINCIPAL:
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // 1. Inicializar la base de datos
+        DataStore.get();
+        
+        // 2. Crear y configurar la aplicación Javalin
+        Javalin app = Javalin.create(c -> {
+            // Habilitar CORS para desarrollo
+            c.plugins.enableCors(cors -> cors.add(it -> it.anyHost()));
+        }).start(7000);  // Puerto 7000
+        
+        // 3. Configurar WebSocket para actualizaciones en tiempo real
+        app.ws("/api/ws", ws -> {
+            ws.onConnect(ctx -> Controlador.wsClients.add(ctx));
+            ws.onClose(ctx -> Controlador.wsClients.remove(ctx));
+        });
+        
+        // 4. Registrar rutas de la API
+        // Estudiantes
+        app.get("/api/students", EstudianteController::getAll);
+        app.post("/api/students", EstudianteController::create);
+        app.patch("/api/students/{id}", EstudianteController::update);
+        app.delete("/api/students/{id}", EstudianteController::delete);
+        
+        // Profesores
+        app.get("/api/professors", ProfesorController::getAll);
+        app.post("/api/professors", ProfesorController::create);
+        // ... más rutas
+        
+        // Cursos, Inscripciones, Calificaciones, Reportes
+        // ... (similar pattern)
+        
+        System.out.println("Sistema listo en http://localhost:7000");
+    }
+}
+```
+
+EXPLICACIÓN:
+- Javalin es un framework web ligero para Java
+- Se configura CORS para permitir peticiones desde el frontend
+- WebSocket permite comunicación bidireccional en tiempo real
+- Cada ruta HTTP se mapea a un método de controlador específico
+
+3.2 CONTROLADORES
+-----------------
+
+Los controladores manejan las peticiones HTTP y coordinan la lógica de negocio.
+
+EJEMPLO: EstudianteController.java
+
+```java
+public class EstudianteController extends Controlador {
+    
+    // GET /api/students - Obtener todos los estudiantes
+    public static void getAll(Context ctx) {
+        List<Estudiante> estudiantes = DataStore.get().getEstudiantes();
+        ctx.json(estudiantes);
+    }
+    
+    // POST /api/students - Crear un nuevo estudiante
+    public static void create(Context ctx) {
+        try {
+            // 1. Parsear el JSON del cuerpo de la petición
+            Estudiante estudiante = ctx.bodyAsClass(Estudiante.class);
+            
+            // 2. Validar los datos
+            Validator.validateEstudiante(estudiante);
+            
+            // 3. Generar ID único
+            estudiante.setId(UUID.randomUUID().toString());
+            
+            // 4. Guardar en la base de datos
+            DataStore.get().addEstudiante(estudiante);
+            
+            // 5. Notificar a clientes WebSocket
+            notifyClients("student_created", estudiante);
+            
+            // 6. Responder con el estudiante creado
+            ctx.status(201).json(estudiante);
+            
+        } catch (ValidationException e) {
+            ctx.status(400).json(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    // PATCH /api/students/{id} - Actualizar estudiante
+    public static void update(Context ctx) {
+        String id = ctx.pathParam("id");
+        Estudiante updates = ctx.bodyAsClass(Estudiante.class);
+        
+        Estudiante existing = DataStore.get().getEstudiante(id);
+        if (existing == null) {
+            ctx.status(404).json(Map.of("error", "Estudiante no encontrado"));
+            return;
+        }
+        
+        // Actualizar solo los campos proporcionados
+        if (updates.getFirstName() != null) {
+            existing.setFirstName(updates.getFirstName());
+        }
+        // ... más campos
+        
+        DataStore.get().updateEstudiante(existing);
+        notifyClients("student_updated", existing);
+        ctx.json(existing);
+    }
+    
+    // DELETE /api/students/{id} - Eliminar estudiante
+    public static void delete(Context ctx) {
+        String id = ctx.pathParam("id");
+        
+        if (DataStore.get().deleteEstudiante(id)) {
+            notifyClients("student_deleted", Map.of("id", id));
+            ctx.status(204);
+        } else {
+            ctx.status(404).json(Map.of("error", "Estudiante no encontrado"));
+        }
+    }
+}
+```
+
+PATRÓN COMÚN EN CONTROLADORES:
+1. Recibir petición HTTP (Context ctx)
+2. Extraer parámetros (path params, query params, body)
+3. Validar datos
+4. Interactuar con DataStore
+5. Notificar cambios vía WebSocket
+6. Enviar respuesta JSON
+
+3.3 MODELOS DE DATOS
+--------------------
+
+Los modelos representan las entidades del sistema.
+
+EJEMPLO: Estudiante.java
+
+```java
+public class Estudiante {
+    private String id;
+    private String studentId;      // ID del estudiante (ej: "STU001")
+    private String firstName;      // Nombre
+    private String lastName;       // Apellido
+    private String email;          // Email
+    private String phone;          // Teléfono (opcional)
+    private String program;        // Programa académico
+    private int semester;          // Semestre actual (1-8)
+    private String status;         // Estado: "active", "inactive", "graduated"
+    
+    // Constructor vacío para Jackson (deserialización JSON)
+    public Estudiante() {}
+    
+    // Getters y Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    
+    // ... más getters/setters
+    
+    // Método toString para debugging
+    @Override
+    public String toString() {
+        return "Estudiante{" +
+               "id='" + id + '\'' +
+               ", studentId='" + studentId + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               '}';
+    }
+}
+```
+
+OTROS MODELOS:
+- Profesor.java: Similar a Estudiante, con department y specialization
+- Curso.java: courseCode, name, description, credits, capacity, etc.
+- Inscripcion.java: Relaciona estudiante con curso
+- Calificacion.java: grade, letterGrade, fecha
+
+3.4 PERSISTENCIA - DataStore.java
+----------------------------------
+
+DataStore maneja la persistencia de datos en JSON y caché en memoria.
+
+```java
+public class DataStore {
+    private static DataStore instance;
+    private static final String DATA_FILE = "data.json";
+    
+    // Caché en memoria (thread-safe)
+    private ConcurrentHashMap<String, Estudiante> estudiantes;
+    private ConcurrentHashMap<String, Profesor> profesores;
+    private ConcurrentHashMap<String, Curso> cursos;
+    private ConcurrentHashMap<String, Inscripcion> inscripciones;
+    private ConcurrentHashMap<String, Calificacion> calificaciones;
+    
+    private ObjectMapper mapper;  // Jackson para JSON
+    
+    // Singleton pattern
+    public static synchronized DataStore get() {
+        if (instance == null) {
+            instance = new DataStore();
+        }
+        return instance;
+    }
+    
+    private DataStore() {
+        mapper = new ObjectMapper();
+        loadData();  // Cargar datos desde data.json
+    }
+    
+    // Cargar datos desde JSON
+    private void loadData() {
+        File file = new File(DATA_FILE);
+        if (file.exists()) {
+            try {
+                JsonNode root = mapper.readTree(file);
+                
+                // Cargar estudiantes
+                JsonNode estudiantesNode = root.get("estudiantes");
+                if (estudiantesNode != null) {
+                    for (JsonNode node : estudiantesNode) {
+                        Estudiante e = mapper.treeToValue(node, Estudiante.class);
+                        estudiantes.put(e.getId(), e);
+                    }
+                }
+                
+                // Similar para profesores, cursos, etc.
+                
+            } catch (IOException e) {
+                System.err.println("Error cargando datos: " + e.getMessage());
+            }
+        } else {
+            // Crear archivo vacío si no existe
+            saveData();
+        }
+    }
+    
+    // Guardar datos a JSON
+    private synchronized void saveData() {
+        try {
+            Map<String, Object> data = new HashMap<>();
+            data.put("estudiantes", estudiantes.values());
+            data.put("profesores", profesores.values());
+            data.put("cursos", cursos.values());
+            data.put("inscripciones", inscripciones.values());
+            data.put("calificaciones", calificaciones.values());
+            
+            mapper.writerWithDefaultPrettyPrinter()
+                  .writeValue(new File(DATA_FILE), data);
+                  
+        } catch (IOException e) {
+            System.err.println("Error guardando datos: " + e.getMessage());
+        }
+    }
+    
+    // CRUD Operations
+    public void addEstudiante(Estudiante e) {
+        estudiantes.put(e.getId(), e);
+        saveData();  // Persistir cambios
+    }
+    
+    public Estudiante getEstudiante(String id) {
+        return estudiantes.get(id);
+    }
+    
+    public List<Estudiante> getEstudiantes() {
+        return new ArrayList<>(estudiantes.values());
+    }
+    
+    public void updateEstudiante(Estudiante e) {
+        estudiantes.put(e.getId(), e);
+        saveData();
+    }
+    
+    public boolean deleteEstudiante(String id) {
+        boolean removed = estudiantes.remove(id) != null;
+        if (removed) saveData();
+        return removed;
+    }
+    
+    // Similar para otras entidades...
+}
+```
+
+VENTAJAS DE ESTE ENFOQUE:
+- ConcurrentHashMap permite acceso thread-safe
+- Caché en memoria = lecturas muy rápidas
+- Persistencia en JSON = datos sobreviven reinicios
+- Sincronización automática entre memoria y disco
+
+================================================================================
+4. FRONTEND - REACT + TYPESCRIPT
+================================================================================
+
+4.1 ESTRUCTURA DE COMPONENTES
+------------------------------
+
+El frontend sigue una arquitectura de componentes React moderna:
+
+client/src/
+├── pages/              # Páginas principales (rutas)
+│   ├── dashboard.tsx   # Panel principal con estadísticas
+│   ├── students.tsx    # CRUD de estudiantes
+│   ├── professors.tsx  # CRUD de profesores
+│   ├── courses.tsx     # CRUD de cursos
+│   ├── enrollments.tsx # Gestión de inscripciones
+│   └── reports.tsx     # Reportes y analítica
+├── components/
+│   ├── ui/             # Componentes base (shadcn/ui)
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── dialog.tsx
+│   │   ├── table.tsx
+│   │   └── ... (50+ componentes)
+│   ├── app-sidebar.tsx # Barra lateral de navegación
+│   └── theme-provider.tsx # Proveedor de tema claro/oscuro
+├── lib/
+│   ├── queryClient.ts  # Configuración React Query
+│   └── utils.ts        # Utilidades
+├── hooks/
+│   └── use-toast.tsx   # Hook para notificaciones
+└── shared/
+    └── schema.ts       # Esquemas Zod compartidos con backend
+
+4.2 EJEMPLO DE PÁGINA - students.tsx
+-------------------------------------
+
+```typescript
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { insertStudentSchema, type Student, type InsertStudent } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+export default function Students() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+  
+  // 1. OBTENER DATOS CON REACT QUERY
+  const { data: students, isLoading } = useQuery<Student[]>({
+    queryKey: ["/api/students"],  // Clave única para caché
+  });
+  
+  // 2. CONFIGURAR FORMULARIO CON VALIDACIÓN ZOD
+  const form = useForm<InsertStudent>({
+    resolver: zodResolver(insertStudentSchema),
+    defaultValues: {
+      studentId: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      program: "",
+      semester: 1,
+      status: "active",
+    },
+  });
+  
+  // 3. MUTACIÓN PARA CREAR ESTUDIANTE
+  const createMutation = useMutation({
+    mutationFn: (data: InsertStudent) => 
+      apiRequest("POST", "/api/students", data),
+    onSuccess: () => {
+      // Invalidar caché para refrescar datos
+      queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+      setIsDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Éxito",
+        description: "Estudiante creado exitosamente",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // 4. MUTACIÓN PARA ELIMINAR ESTUDIANTE
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => 
+      apiRequest("DELETE", `/api/students/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+      toast({
+        title: "Éxito",
+        description: "Estudiante eliminado exitosamente",
+      });
+    },
+  });
+  
+  // 5. FILTRAR ESTUDIANTES POR BÚSQUEDA
+  const filteredStudents = students?.filter(
+    (student) =>
+      student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  // 6. MANEJAR SUBMIT DEL FORMULARIO
+  const onSubmit = (data: InsertStudent) => {
+    createMutation.mutate(data);
+  };
+  
+  // 7. RENDERIZAR UI
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold">Estudiantes</h1>
+          <p className="text-muted-foreground">
+            Gestionar registros y perfiles de estudiantes
+          </p>
+        </div>
+        <Button onClick={() => setIsDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Estudiante
+        </Button>
+      </div>
+      
+      {/* Búsqueda */}
+      <Card>
+        <CardHeader>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              placeholder="Buscar por nombre, ID, email o programa..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </CardHeader>
+        
+        {/* Tabla de estudiantes */}
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Estudiante</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Programa</TableHead>
+                <TableHead>Semestre</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Contacto</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredStudents?.map((student) => (
+                <TableRow key={student.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarFallback>
+                          {student.firstName[0]}{student.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">
+                          {student.firstName} {student.lastName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {student.email}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                      {student.studentId}
+                    </code>
+                  </TableCell>
+                  <TableCell>{student.program}</TableCell>
+                  <TableCell>{student.semester}</TableCell>
+                  <TableCell>
+                    <Badge variant={student.status === "active" ? "default" : "secondary"}>
+                      {student.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{student.phone || "N/A"}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteMutation.mutate(student.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      
+      {/* Dialog para crear estudiante */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Agregar Nuevo Estudiante</DialogTitle>
+            <DialogDescription>
+              Complete la información del estudiante a continuación
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Campos del formulario */}
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Juan" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* ... más campos ... */}
+              
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending}>
+                  {createMutation.isPending ? "Creando..." : "Crear Estudiante"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+```
+
+CONCEPTOS CLAVE:
+- **React Query**: Gestión de estado del servidor (caché, refetch, etc.)
+- **React Hook Form**: Gestión de formularios con validación
+- **Zod**: Validación de esquemas TypeScript
+- **shadcn/ui**: Componentes UI accesibles y personalizables
+
+4.3 VALIDACIÓN CON ZOD - shared/schema.ts
+------------------------------------------
+
+```typescript
+import { z } from "zod";
+
+// Esquema para crear estudiante
+export const insertStudentSchema = z.object({
+  studentId: z.string().min(1, "ID de estudiante requerido"),
+  firstName: z.string().min(1, "Nombre requerido"),
+  lastName: z.string().min(1, "Apellido requerido"),
+  email: z.string().email("Email inválido"),
+  phone: z.string().optional(),
+  program: z.string().min(1, "Programa requerido"),
+  semester: z.number().min(1).max(12),
+  status: z.enum(["active", "inactive", "graduated"]),
+});
+
+// Tipo TypeScript inferido del esquema
+export type InsertStudent = z.infer<typeof insertStudentSchema>;
+
+// Esquema completo (incluye ID generado por servidor)
+export const studentSchema = insertStudentSchema.extend({
+  id: z.string(),
+});
+
+export type Student = z.infer<typeof studentSchema>;
+
+// Similar para Profesor, Curso, Inscripcion, Calificacion
+```
+
+VENTAJAS DE ZOD:
+- Validación en tiempo de ejecución
+- Tipos TypeScript automáticos
+- Mensajes de error personalizados
+- Compartido entre frontend y backend
+
+4.4 GESTIÓN DE ESTADO CON REACT QUERY
+--------------------------------------
+
+```typescript
+// lib/queryClient.ts
+import { QueryClient } from "@tanstack/react-query";
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Configuración por defecto para queries
+      staleTime: 1000 * 60 * 5,  // 5 minutos
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Función helper para hacer peticiones API
+export async function apiRequest(
+  method: string,
+  url: string,
+  data?: any
+): Promise<any> {
+  const options: RequestInit = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  
+  if (data) {
+    options.body = JSON.stringify(data);
+  }
+  
+  const response = await fetch(url, options);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Error en la petición");
+  }
+  
+  if (response.status === 204) {
+    return null;  // No content
+  }
+  
+  return response.json();
+}
+```
+
+REACT QUERY PROPORCIONA:
+- Caché automático de datos
+- Refetch automático cuando los datos cambian
+- Estados de loading/error
+- Optimistic updates
+- Invalidación de caché
+
+================================================================================
+5. COMUNICACIÓN FRONTEND-BACKEND
+================================================================================
+
+5.1 CONFIGURACIÓN DEL PROXY (vite.config.ts)
+---------------------------------------------
+
+```typescript
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "shared"),
+    },
+  },
+  root: path.resolve(__dirname),
+  build: {
+    outDir: path.resolve(__dirname, "../src/main/resources/public"),
+    emptyOutDir: true,
+  },
+  server: {
+    proxy: {
+      // Redirigir todas las peticiones /api al backend Java
+      "/api": {
+        target: "http://localhost:7000",
+        changeOrigin: true,
+      },
+    },
+  },
+});
+```
+
+FLUJO DE PETICIÓN:
+1. Frontend (localhost:5173) hace petición a /api/students
+2. Vite proxy redirige a http://localhost:7000/api/students
+3. Backend Java procesa la petición
+4. Backend responde con JSON
+5. Frontend recibe la respuesta
+
+5.2 WEBSOCKET PARA TIEMPO REAL
+-------------------------------
+
+Backend (Java):
+```java
+// En Main.java
+app.ws("/api/ws", ws -> {
+    ws.onConnect(ctx -> {
+        Controlador.wsClients.add(ctx);
+        System.out.println("Cliente WebSocket conectado");
+    });
+    
+    ws.onClose(ctx -> {
+        Controlador.wsClients.remove(ctx);
+        System.out.println("Cliente WebSocket desconectado");
+    });
+});
+
+// En Controlador.java
+protected static void notifyClients(String event, Object data) {
+    String message = mapper.writeValueAsString(
+        Map.of("event", event, "data", data)
+    );
+    
+    for (WsContext client : wsClients) {
+        try {
+            client.send(message);
+        } catch (Exception e) {
+            System.err.println("Error enviando mensaje WebSocket: " + e);
+        }
+    }
+}
+```
+
+Frontend (TypeScript):
+```typescript
+// Conectar al WebSocket
+const ws = new WebSocket("ws://localhost:7000/api/ws");
+
+ws.onopen = () => {
+  console.log("WebSocket conectado");
+};
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  
+  // Invalidar caché según el evento
+  if (message.event === "student_created" || 
+      message.event === "student_updated" || 
+      message.event === "student_deleted") {
+    queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+  }
+  
+  // Similar para otros eventos
+};
+
+ws.onerror = (error) => {
+  console.error("Error WebSocket:", error);
+};
+
+ws.onclose = () => {
+  console.log("WebSocket desconectado");
+  // Reconectar después de 5 segundos
+  setTimeout(() => connectWebSocket(), 5000);
+};
+```
+
+BENEFICIOS:
+- Actualizaciones instantáneas en todos los clientes
+- No necesita polling
+- Comunicación bidireccional
+
+================================================================================
+6. SISTEMA DE CALIFICACIONES COLOMBIANO
+================================================================================
+
+6.1 ESCALA DE CALIFICACIONES
+-----------------------------
+
+ESCALA COLOMBIANA (1.0 - 5.0):
+- A = 5.0 (Excelente)     → Calificación >= 4.5
+- B = 4.5 (Sobresaliente) → Calificación >= 4.0 y < 4.5
+- C = 4.0 (Aceptable)     → Calificación >= 3.0 y < 4.0
+- D = 3.0 (Insuficiente)  → Calificación >= 2.0 y < 3.0
+- F = 1.0 (Reprobado)     → Calificación < 2.0
+
+6.2 IMPLEMENTACIÓN EN FRONTEND (reports.tsx)
+---------------------------------------------
+
+```typescript
+// Función para calcular calificación colombiana
+const calculateColombianGrade = (grade: number): number => {
+  if (grade >= 90) return 5.0;
+  if (grade >= 80) return 4.5;
+  if (grade >= 70) return 4.0;
+  if (grade >= 60) return 3.0;
+  // Para calificaciones < 60, escala lineal de 1.0 a 3.0
+  return 1.0 + (grade / 60) * 2.0;
+};
+
+// Calcular promedio en escala colombiana
+const avgGrade =
+  grades && grades.length > 0
+    ? (
+        grades.reduce((sum, g) => 
+          sum + calculateColombianGrade(parseFloat(String(g.grade || "0"))), 0
+        ) / grades.length
+      ).toFixed(1)
+    : "0.0";
+
+// Distribución de calificaciones
+const gradeDistribution = [
+  { letter: "A", grade: "5.0", min: 4.5 },
+  { letter: "B", grade: "4.5", min: 4.0 },
+  { letter: "C", grade: "4.0", min: 3.0 },
+  { letter: "D", grade: "3.0", min: 2.0 },
+  { letter: "F", grade: "1.0", min: 0 }
+].map(({ letter, grade, min }) => {
+  const count = grades?.filter((g) => {
+    const gradeValue = parseFloat(String(g.grade || "0"));
+    if (letter === "A") return gradeValue >= 4.5;
+    if (letter === "B") return gradeValue >= 4.0 && gradeValue < 4.5;
+    if (letter === "C") return gradeValue >= 3.0 && gradeValue < 4.0;
+    if (letter === "D") return gradeValue >= 2.0 && gradeValue < 3.0;
+    return gradeValue < 2.0;
+  }).length || 0;
+  
+  const percentage =
+    grades && grades.length > 0 
+      ? ((count / grades.length) * 100).toFixed(1) 
+      : "0.0";
+  
+  return { letter, grade, count, percentage };
+});
+```
+
+6.3 VISUALIZACIÓN EN UI
+------------------------
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Distribución de Calificaciones</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-5 gap-4">
+      {gradeDistribution.map(({ letter, grade, count, percentage }) => (
+        <div
+          key={letter}
+          className="flex flex-col items-center gap-2 p-4 rounded-md border"
+        >
+          <div className="text-3xl font-bold">{letter}</div>
+          <div className="text-sm text-muted-foreground">{grade}</div>
+          <div className="text-2xl font-semibold text-muted-foreground">
+            {count}
+          </div>
+          <div className="text-xs text-muted-foreground">{percentage}%</div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>
+```
+
+RESULTADO:
+┌─────┬─────┬─────┬─────┬─────┐
+│  A  │  B  │  C  │  D  │  F  │
+│ 5.0 │ 4.5 │ 4.0 │ 3.0 │ 1.0 │
+│ 15  │ 23  │ 18  │  8  │  3  │
+│22.4%│34.3%│26.9%│11.9%│ 4.5%│
+└─────┴─────┴─────┴─────┴─────┘
+
+================================================================================
+7. BASE DE DATOS Y PERSISTENCIA
+================================================================================
+
+7.1 ESTRUCTURA DEL ARCHIVO data.json
+-------------------------------------
+
+```json
+{
+  "estudiantes": [
+    {
+      "id": "uuid-1234-5678",
+      "studentId": "STU001",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "email": "juan.perez@techfuture.edu",
+      "phone": "+57 300 123 4567",
+      "program": "Ciencias de la Computación",
+      "semester": 3,
+      "status": "active"
+    }
+  ],
+  "profesores": [
+    {
+      "id": "uuid-abcd-efgh",
+      "professorId": "PROF001",
+      "firstName": "María",
+      "lastName": "García",
+      "email": "maria.garcia@techfuture.edu",
+      "phone": "+57 310 987 6543",
+      "department": "Ingeniería",
+      "specialization": "Inteligencia Artificial",
+      "status": "active"
+    }
+  ],
+  "cursos": [
+    {
+      "id": "uuid-curso-1",
+      "courseCode": "CS101",
+      "name": "Introducción a las Ciencias de la Computación",
+      "description": "Fundamentos de programación y algoritmos",
+      "department": "Ciencias de la Computación",
+      "credits": 3,
+      "capacity": 30,
+      "professorId": "uuid-abcd-efgh",
+      "semester": "Otoño 2024",
+      "schedule": "LMV 10:00-11:00",
+      "room": "A-101",
+      "status": "active"
+    }
+  ],
+  "inscripciones": [
+    {
+      "id": "uuid-inscr-1",
+      "studentId": "uuid-1234-5678",
+      "courseId": "uuid-curso-1",
+      "semester": "Otoño 2024",
+      "enrollmentDate": "2024-08-15T10:00:00Z",
+      "status": "enrolled"
+    }
+  ],
+  "calificaciones": [
+    {
+      "id": "uuid-calif-1",
+      "enrollmentId": "uuid-inscr-1",
+      "grade": "4.5",
+      "letterGrade": "B",
+      "date": "2024-11-20T15:30:00Z"
+    }
+  ]
+}
+```
+
+7.2 FLUJO DE PERSISTENCIA
+--------------------------
+
+LECTURA:
+1. Aplicación inicia
+2. DataStore.get() se llama (singleton)
+3. Constructor carga data.json
+4. JSON se parsea con Jackson
+5. Datos se cargan en ConcurrentHashMaps
+6. Datos disponibles en memoria
+
+ESCRITURA:
+1. Controlador modifica datos (ej: crear estudiante)
+2. DataStore.addEstudiante() actualiza HashMap
+3. DataStore.saveData() se llama automáticamente
+4. Todos los HashMaps se serializan a JSON
+5. JSON se escribe a data.json con formato pretty-print
+6. Cambios persistidos
+
+VENTAJAS:
+- Lecturas muy rápidas (todo en memoria)
+- Escrituras atómicas (synchronized)
+- Thread-safe (ConcurrentHashMap)
+- Formato legible (JSON pretty-printed)
+- Fácil backup y migración
+
+================================================================================
+8. FUNCIONALIDADES PRINCIPALES
+================================================================================
+
+8.1 GESTIÓN DE ESTUDIANTES
+---------------------------
+- Crear, leer, actualizar, eliminar estudiantes
+- Búsqueda por nombre, ID, email, programa
+- Validación de datos (email, teléfono, etc.)
+- Estados: activo, inactivo, graduado
+- Programas académicos predefinidos
+- Semestres de 1 a 8
+
+8.2 GESTIÓN DE PROFESORES
+--------------------------
+- CRUD completo de profesores
+- Departamentos académicos
+- Especialización (opcional)
+- Estados: activo, inactivo, retirado
+- Asignación a cursos
+
+8.3 GESTIÓN DE CURSOS
+----------------------
+- Crear y administrar cursos
+- Código de curso único
+- Créditos académicos (1-6)
+- Capacidad de estudiantes
+- Asignación de profesor
+- Horarios y aulas
+- Semestres académicos
+
+8.4 INSCRIPCIONES
+-----------------
+- Inscribir estudiantes en cursos
+- Validación de capacidad
+- Estados: inscrito, retirado, completado
+- Fecha de inscripción automática
+- Relación estudiante-curso
+
+8.5 CALIFICACIONES
+------------------
+- Registro de calificaciones
+- Escala colombiana (1.0-5.0)
+- Letra de calificación (A-F)
+- Fecha de calificación
+- Vinculación con inscripción
+
+8.6 REPORTES Y ANALÍTICA
+-------------------------
+- Estadísticas generales del sistema
+- Total de estudiantes, profesores, cursos
+- Inscripciones activas y completadas
+- Promedio general en escala colombiana
+- Distribución de calificaciones (A-F)
+- Inscripciones por departamento
+- Cursos más inscritos
+- Gráficos y visualizaciones
+
+8.7 CARACTERÍSTICAS ADICIONALES
+--------------------------------
+- Modo claro/oscuro
+- Diseño responsivo (desktop/móvil)
+- Búsqueda en tiempo real
+- Notificaciones toast
+- Validación de formularios
+- Actualizaciones en tiempo real (WebSocket)
+- Interfaz completamente en español
+
+================================================================================
+9. EJEMPLOS DE CÓDIGO IMPORTANTES
+================================================================================
+
+9.1 CREAR UN NUEVO ESTUDIANTE (FLUJO COMPLETO)
+-----------------------------------------------
+
+FRONTEND (students.tsx):
+```typescript
+// 1. Usuario llena el formulario
+const form = useForm<InsertStudent>({
+  resolver: zodResolver(insertStudentSchema),
+  defaultValues: {
+    studentId: "STU123",
+    firstName: "Carlos",
+    lastName: "Rodríguez",
+    email: "carlos.rodriguez@techfuture.edu",
+    phone: "+57 300 111 2222",
+    program: "Ingeniería",
+    semester: 2,
+    status: "active",
+  },
+});
+
+// 2. Usuario hace submit
+const onSubmit = (data: InsertStudent) => {
+  createMutation.mutate(data);
+};
+
+// 3. Mutación envía petición al backend
+const createMutation = useMutation({
+  mutationFn: (data: InsertStudent) => 
+    apiRequest("POST", "/api/students", data),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+    toast({ title: "Éxito", description: "Estudiante creado" });
+  },
+});
+```
+
+BACKEND (EstudianteController.java):
+```java
+public static void create(Context ctx) {
+    // 1. Parsear JSON del body
+    Estudiante estudiante = ctx.bodyAsClass(Estudiante.class);
+    
+    // 2. Validar datos
+    if (estudiante.getFirstName() == null || estudiante.getFirstName().isEmpty()) {
+        ctx.status(400).json(Map.of("error", "Nombre requerido"));
+        return;
+    }
+    
+    // 3. Generar ID único
+    estudiante.setId(UUID.randomUUID().toString());
+    
+    // 4. Guardar en base de datos
+    DataStore.get().addEstudiante(estudiante);
+    
+    // 5. Notificar a clientes WebSocket
+    notifyClients("student_created", estudiante);
+    
+    // 6. Responder con estudiante creado
+    ctx.status(201).json(estudiante);
+}
+```
+
+PERSISTENCIA (DataStore.java):
+```java
+public void addEstudiante(Estudiante e) {
+    // 1. Agregar a HashMap en memoria
+    estudiantes.put(e.getId(), e);
+    
+    // 2. Guardar a disco
+    saveData();
+}
+
+private synchronized void saveData() {
+    // 1. Crear mapa con todos los datos
+    Map<String, Object> data = new HashMap<>();
+    data.put("estudiantes", estudiantes.values());
+    data.put("profesores", profesores.values());
+    // ... más entidades
+    
+    // 2. Escribir a JSON
+    mapper.writerWithDefaultPrettyPrinter()
+          .writeValue(new File(DATA_FILE), data);
+}
+```
+
+9.2 BÚSQUEDA EN TIEMPO REAL
+----------------------------
+
+```typescript
+// Estado de búsqueda
+const [searchQuery, setSearchQuery] = useState("");
+
+// Filtrar estudiantes mientras el usuario escribe
+const filteredStudents = students?.filter(
+  (student) =>
+    student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.program.toLowerCase().includes(searchQuery.toLowerCase())
+);
+
+// Input de búsqueda
+<Input
+  placeholder="Buscar por nombre, ID, email o programa..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+/>
+
+// Tabla muestra resultados filtrados
+<TableBody>
+  {filteredStudents?.map((student) => (
+    <TableRow key={student.id}>
+      {/* ... */}
+    </TableRow>
+  ))}
+</TableBody>
+```
+
+9.3 MODO CLARO/OSCURO
+---------------------
+
+```typescript
+// theme-provider.tsx
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>("dark");  // Por defecto oscuro
+  
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(theme);
+  }, [theme]);
+  
+  return (
+    <ThemeProviderContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeProviderContext.Provider>
+  );
+}
+
+// Uso en componentes
+const { theme, setTheme } = useTheme();
+
+<Button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+  {theme === "dark" ? <Sun /> : <Moon />}
+</Button>
+```
+
+9.4 VALIDACIÓN CON ZOD
+----------------------
+
+```typescript
+// Definir esquema
+const insertStudentSchema = z.object({
+  studentId: z.string().min(1, "ID requerido"),
+  firstName: z.string().min(1, "Nombre requerido"),
+  lastName: z.string().min(1, "Apellido requerido"),
+  email: z.string().email("Email inválido"),
+  phone: z.string().optional(),
+  program: z.string().min(1, "Programa requerido"),
+  semester: z.number().min(1).max(12),
+  status: z.enum(["active", "inactive", "graduated"]),
+});
+
+// Usar en formulario
+const form = useForm<InsertStudent>({
+  resolver: zodResolver(insertStudentSchema),
+});
+
+// Validación automática al submit
+<form onSubmit={form.handleSubmit(onSubmit)}>
+  <FormField
+    control={form.control}
+    name="email"
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel>Email</FormLabel>
+        <FormControl>
+          <Input {...field} type="email" />
+        </FormControl>
+        <FormMessage />  {/* Muestra errores de validación */}
+      </FormItem>
+    )}
+  />
+</form>
+```
+
+================================================================================
+FIN DE LA PRESENTACIÓN
+================================================================================
+
+Este documento proporciona una visión completa del Sistema de Gestión
+Universitaria, incluyendo:
+
+✓ Arquitectura general del sistema
+✓ Implementación del backend en Java
+✓ Implementación del frontend en React + TypeScript
+✓ Comunicación entre capas
+✓ Sistema de calificaciones colombiano
+✓ Persistencia de datos
+✓ Funcionalidades principales
+✓ Ejemplos de código detallados
+
+Para más información, consultar:
+- README.md: Guía de instalación y uso
+- DOCUMENTACION_TECNICA.txt: Detalles técnicos adicionales
+- Código fuente: Comentarios inline en cada archivo

@@ -16,10 +16,50 @@ public class ProfesorController {
     public static void create(Context ctx) {
         try {
             Profesor b = ctx.bodyAsClass(Profesor.class);
-            Validador.require(Validador.texto(b.nombre()) && Validador.texto(b.especialidad()), "Datos incompletos");
-            Profesor n = new Profesor(UUID.randomUUID().toString(), b.nombre(), b.especialidad());
-            db.profesores.put(n.id(), n);
-            ctx.status(201).json(n);
+            Validador.require(Validador.texto(b.nombre()), "Nombre requerido");
+            Validador.require(Validador.texto(b.apellido()), "Apellido requerido");
+            Validador.require(Validador.email(b.email()), "Email inválido");
+
+            Profesor nuevo = new Profesor(
+                    UUID.randomUUID().toString(),
+                    b.codigoProfesor(),
+                    b.nombre(),
+                    b.apellido(),
+                    b.email(),
+                    b.telefono(),
+                    b.departamento(),
+                    b.especializacion(),
+                    b.status() != null ? b.status() : "activo");
+
+            db.profesores.put(nuevo.id(), nuevo);
+            ctx.status(201).json(nuevo);
+            db.save();
+            Controlador.broadcast("UPDATE");
+        } catch (IllegalArgumentException e) {
+            ctx.status(400).result(e.getMessage());
+        }
+    }
+
+    public static void update(Context ctx) {
+        try {
+            String id = ctx.pathParam("id");
+            Profesor b = ctx.bodyAsClass(Profesor.class);
+            if (!db.profesores.containsKey(id))
+                throw new IllegalArgumentException("Profesor no encontrado");
+
+            Profesor updated = new Profesor(
+                    id,
+                    b.codigoProfesor(),
+                    b.nombre(),
+                    b.apellido(),
+                    b.email(),
+                    b.telefono(),
+                    b.departamento(),
+                    b.especializacion(),
+                    b.status());
+
+            db.profesores.put(id, updated);
+            ctx.json(updated);
             db.save();
             Controlador.broadcast("UPDATE");
         } catch (IllegalArgumentException e) {

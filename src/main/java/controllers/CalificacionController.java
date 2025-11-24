@@ -3,7 +3,6 @@ package controllers;
 import io.javalin.http.Context;
 import models.Calificacion;
 import utils.DataStore;
-import utils.Validador;
 import java.util.UUID;
 
 public class CalificacionController {
@@ -16,13 +15,55 @@ public class CalificacionController {
     public static void create(Context ctx) {
         try {
             Calificacion b = ctx.bodyAsClass(Calificacion.class);
-            Validador.require(Validador.texto(b.inscripcionId()), "Inscripcion requerida");
-            Validador.require(Validador.nota(b.nota()), "Nota debe ser 0.0 - 5.0");
-            Validador.require(b.corte() >= 1 && b.corte() <= 3, "Corte debe ser 1, 2 o 3");
 
-            Calificacion n = new Calificacion(UUID.randomUUID().toString(), b.inscripcionId(), b.nota(), b.corte());
-            db.calificaciones.put(n.id(), n);
-            ctx.status(201).json(n);
+            // Validar rango de nota colombiana (1.0-5.0)
+            if (b.nota() < 1.0 || b.nota() > 5.0) {
+                throw new IllegalArgumentException("La nota debe estar entre 1.0 y 5.0");
+            }
+
+            // Generar nota letra automáticamente
+            String notaLetra = Calificacion.obtenerNotaLetra(b.nota());
+
+            Calificacion nueva = new Calificacion(
+                    UUID.randomUUID().toString(),
+                    b.inscripcionId(),
+                    b.nota(),
+                    notaLetra,
+                    b.status() != null ? b.status() : "pendiente");
+
+            db.calificaciones.put(nueva.id(), nueva);
+            ctx.status(201).json(nueva);
+            db.save();
+            Controlador.broadcast("UPDATE");
+        } catch (IllegalArgumentException e) {
+            ctx.status(400).result(e.getMessage());
+        }
+    }
+
+    public static void update(Context ctx) {
+        try {
+            String id = ctx.pathParam("id");
+            Calificacion b = ctx.bodyAsClass(Calificacion.class);
+            if (!db.calificaciones.containsKey(id))
+                throw new IllegalArgumentException("Calificación no encontrada");
+
+            // Validar rango de nota colombiana (1.0-5.0)
+            if (b.nota() < 1.0 || b.nota() > 5.0) {
+                throw new IllegalArgumentException("La nota debe estar entre 1.0 y 5.0");
+            }
+
+            // Generar nota letra automáticamente
+            String notaLetra = Calificacion.obtenerNotaLetra(b.nota());
+
+            Calificacion updated = new Calificacion(
+                    id,
+                    b.inscripcionId(),
+                    b.nota(),
+                    notaLetra,
+                    b.status());
+
+            db.calificaciones.put(id, updated);
+            ctx.json(updated);
             db.save();
             Controlador.broadcast("UPDATE");
         } catch (IllegalArgumentException e) {

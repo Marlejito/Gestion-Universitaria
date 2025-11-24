@@ -1,0 +1,103 @@
+═══════════════════════════════════════════════════════════════════
+    DOCUMENTACIÓN TÉCNICA - GESTIÓN UNIVERSITARIA
+═══════════════════════════════════════════════════════════════════
+
+1. INFORMACIÓN GENERAL
+   Nombre: Gestión Universitaria
+   Descripción: Sistema web para la administración de estudiantes, profesores, cursos y calificaciones.
+   Tipo: Aplicación Web Moderna (Full-Stack)
+
+═══════════════════════════════════════════════════════════════════
+
+2. ARQUITECTURA DEL SISTEMA (VISTA DE ALTO NIVEL)
+
+   El sistema sigue una arquitectura moderna de cliente-servidor:
+
+   ┌─────────────────┐         ┌─────────────────┐         ┌──────────┐
+   │    FRONTEND     │  HTTP   │     BACKEND     │         │  DATOS   │
+   │ (Interfaz Web)  │ ◄─────► │   (Servidor)    │ ◄─────► │ (Archivo)│
+   │ React + TS      │         │ Java + Javalin  │         │ JSON     │
+   └─────────────────┘         └─────────────────┘         └──────────┘
+           ▲                            │
+           └────────────────────────────┘
+              Actualizaciones en Tiempo Real
+                     (WebSocket)
+
+   - Frontend: Es la parte visual que ve el usuario. Se ejecuta en el navegador.
+   - Backend: Es el cerebro del sistema. Procesa las reglas de negocio y gestiona los datos.
+   - Datos: La información se guarda en un archivo estructurado (JSON) para facilitar su portabilidad.
+     NOTA: Las claves del JSON están en inglés (ej. "firstName") para mantener consistencia con el código fuente.
+
+═══════════════════════════════════════════════════════════════════
+
+3. TECNOLOGÍAS UTILIZADAS
+
+   FRONTEND (Interfaz de Usuario):
+   - React: Librería principal para construir la interfaz.
+   - TypeScript: Añade seguridad y robustez al código JavaScript.
+   - Tailwind CSS: Para el diseño visual moderno y responsivo.
+   - Vite: Herramienta que empaqueta y optimiza la aplicación web.
+
+   BACKEND (Lógica del Servidor):
+   - Java 17: Lenguaje de programación robusto y seguro.
+   - Javalin: Framework ligero para crear el servidor web.
+   - Maven: Gestor de dependencias y construcción del proyecto.
+
+═══════════════════════════════════════════════════════════════════
+
+4. ESTRUCTURA DEL PROYECTO
+
+   El proyecto se divide en dos grandes carpetas:
+
+   A. CARPETA 'frontend' (La parte visual)
+      ├── pages/          -> Las pantallas de la aplicación:
+      │   ├── dashboard   -> Panel principal con resúmenes.
+      │   ├── students    -> Gestión de estudiantes.
+      │   ├── professors  -> Gestión de profesores.
+      │   ├── courses     -> Catálogo de cursos.
+      │   └── reports     -> Reportes y estadísticas.
+      │
+      ├── components/     -> Piezas reutilizables (botones, menús, tablas).
+      └── lib/            -> Utilidades de conexión con el servidor.
+
+   B. CARPETA 'src/main/java' (El servidor)
+      ├── app/            -> Punto de inicio del servidor.
+      ├── controllers/    -> "Controladores" que reciben las peticiones del frontend
+      │                      (ej. "Crear estudiante", "Listar cursos").
+      ├── models/         -> Definición de los datos (Qué es un Estudiante, qué es un Curso).
+      └── utils/          -> Herramientas para guardar/leer datos y validar información.
+
+═══════════════════════════════════════════════════════════════════
+
+5. CARACTERÍSTICAS PRINCIPALES
+
+   - Gestión Integral: CRUD (Crear, Leer, Actualizar, Borrar) para todas las entidades.
+   - Tiempo Real: Si un usuario hace un cambio, todos los demás lo ven al instante sin recargar.
+   - Sistema de Calificación: Conversión automática de notas numéricas (0-100) a escala 1.0 - 5.0.
+   - Diseño Responsivo: Se adapta a pantallas de escritorio y móviles.
+   - Modo Oscuro/Claro: Preferencia visual personalizable.
+
+═══════════════════════════════════════════════════════════════════
+
+6. CÓMO FUNCIONA (FLUJO DE EJEMPLO)
+
+   Cuando un usuario crea un nuevo estudiante:
+
+   1. El usuario llena el formulario en la web (Frontend).
+   2. La web envía los datos al servidor (Backend).
+   3. El servidor valida que los datos estén correctos (ej. email válido).
+   4. El servidor guarda el nuevo estudiante en el archivo de datos.
+   5. El servidor avisa a todos los navegadores conectados que hay un nuevo estudiante.
+   6. La lista de estudiantes se actualiza automáticamente en la pantalla de todos.
+
+═══════════════════════════════════════════════════════════════════
+
+7. INSTRUCCIONES DE EJECUCIÓN
+
+   Para iniciar el sistema completo:
+
+   1. El Backend (Java) inicia el servidor en el puerto 7000.
+   2. El servidor Java también se encarga de entregar los archivos del Frontend.
+   3. Acceder desde el navegador a: http://localhost:7000
+
+═══════════════════════════════════════════════════════════════════

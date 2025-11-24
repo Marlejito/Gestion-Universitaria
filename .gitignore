@@ -1,14 +1,25 @@
+# Compiled files
 target/
 *.class
-*.jar
-*.war
-*.ear
-*.log
+
+# Node modules
+node_modules/
+dist/
+
+# IDE
+.vscode/
 .idea/
 *.iml
-.vscode/
-.settings/
-.classpath
-.project
-data.json
+
+# Build artifacts
 dependency-reduced-pom.xml
+
+# Database
+data.json
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

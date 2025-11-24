@@ -1,15 +1,20 @@
 package utils;
 
+import models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.File;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import models.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class DataStore {
     private static final DataStore INSTANCE = new DataStore();
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private final File file = new File("data.json");
 
     public Map<String, Estudiante> estudiantes = new ConcurrentHashMap<>();
@@ -93,12 +98,12 @@ public class DataStore {
         try {
             // Guardar como listas para mantener compatibilidad JSON
             Map<String, Object> data = new HashMap<>();
-            data.put("estudiantes", estudiantes.values());
-            data.put("profesores", profesores.values());
-            data.put("cursos", cursos.values());
-            data.put("inscripciones", inscripciones.values());
-            data.put("calificaciones", calificaciones.values());
-            data.put("usuarios", usuarios.values());
+            data.put("estudiantes", new java.util.ArrayList<>(estudiantes.values()));
+            data.put("profesores", new java.util.ArrayList<>(profesores.values()));
+            data.put("cursos", new java.util.ArrayList<>(cursos.values()));
+            data.put("inscripciones", new java.util.ArrayList<>(inscripciones.values()));
+            data.put("calificaciones", new java.util.ArrayList<>(calificaciones.values()));
+            data.put("usuarios", new java.util.ArrayList<>(usuarios.values()));
 
             mapper.writeValue(file, data);
         } catch (Exception e) {
