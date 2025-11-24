@@ -10,12 +10,10 @@ public class AuthController {
 
     public static void login(Context ctx) {
         Usuario u = ctx.bodyAsClass(Usuario.class);
-        var found = db.usuarios.stream()
-            .filter(user -> user.username().equals(u.username()) && user.password().equals(u.password()))
-            .findFirst();
+        Usuario found = db.usuarios.get(u.username());
         
-        if (found.isPresent()) {
-            ctx.json(Map.of("token", "valid_token", "rol", found.get().rol()));
+        if (found != null && found.password().equals(u.password())) {
+            ctx.json(Map.of("token", "valid_token", "rol", found.rol()));
         } else {
             ctx.status(401).result("Credenciales inválidas");
         }
