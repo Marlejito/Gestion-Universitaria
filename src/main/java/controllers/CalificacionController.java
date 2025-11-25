@@ -4,6 +4,7 @@ import io.javalin.http.Context;
 import models.Calificacion;
 import utils.DataStore;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CalificacionController {
     private static final DataStore db = DataStore.get();
@@ -12,9 +13,16 @@ public class CalificacionController {
         ctx.json(db.calificaciones.values());
     }
 
+    public record CalificacionRequest(
+            @JsonProperty("enrollmentId") String inscripcionId,
+            @JsonProperty("grade") Double nota,
+            @JsonProperty("letterGrade") String notaLetra,
+            String status) {
+    }
+
     public static void create(Context ctx) {
         try {
-            Calificacion b = ctx.bodyAsClass(Calificacion.class);
+            CalificacionRequest b = ctx.bodyAsClass(CalificacionRequest.class);
 
             // Validar rango de nota colombiana (1.0-5.0)
             if (b.nota() < 1.0 || b.nota() > 5.0) {
@@ -43,7 +51,7 @@ public class CalificacionController {
     public static void update(Context ctx) {
         try {
             String id = ctx.pathParam("id");
-            Calificacion b = ctx.bodyAsClass(Calificacion.class);
+            CalificacionRequest b = ctx.bodyAsClass(CalificacionRequest.class);
             if (!db.calificaciones.containsKey(id))
                 throw new IllegalArgumentException("Calificación no encontrada");
 

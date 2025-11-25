@@ -76,28 +76,260 @@
    - Sistema de Calificación: Conversión automática de notas numéricas (0-100) a escala 1.0 - 5.0.
    - Diseño Responsivo: Se adapta a pantallas de escritorio y móviles.
    - Modo Oscuro/Claro: Preferencia visual personalizable.
+   - Interfaz Completamente en Español: Todas las páginas, formularios y mensajes traducidos.
+   - Reportes y Analítica: Estadísticas detalladas y distribución de calificaciones.
 
 ═══════════════════════════════════════════════════════════════════
 
-6. CÓMO FUNCIONA (FLUJO DE EJEMPLO)
+6. DEPENDENCIAS Y VERSIONES CLAVE
 
-   Cuando un usuario crea un nuevo estudiante:
+   BACKEND (Maven - pom.xml):
+   - Javalin 5.6.3: Framework web ligero y moderno.
+   - Jackson 2.15.2: Procesamiento JSON (serialización/deserialización).
+   - SLF4J 2.0.7: Sistema de logging.
+   - Maven Shade Plugin 3.5.0: Empaqueta todas las dependencias en un JAR único.
 
-   1. El usuario llena el formulario en la web (Frontend).
-   2. La web envía los datos al servidor (Backend).
-   3. El servidor valida que los datos estén correctos (ej. email válido).
-   4. El servidor guarda el nuevo estudiante en el archivo de datos.
-   5. El servidor avisa a todos los navegadores conectados que hay un nuevo estudiante.
-   6. La lista de estudiantes se actualiza automáticamente en la pantalla de todos.
+   FRONTEND (npm - package.json):
+   - React 18.3.1: Biblioteca principal para la interfaz de usuario.
+   - TypeScript 5.6.3: Tipado estático para mayor seguridad.
+   - Vite 5.4.20: Build tool ultrarrápido con Hot Module Replacement.
+   - Tailwind CSS 3.4.17: Framework CSS utility-first.
+   - shadcn/ui (Radix UI): Componentes UI accesibles y modernos.
+   - TanStack Query 5.60.5: Gestión de estado del servidor y caché.
+   - Wouter 3.3.5: Router ligero para navegación.
+   - Zod 3.24.2: Validación de esquemas TypeScript-first.
+   - React Hook Form 7.55.0: Gestión eficiente de formularios.
+   - Recharts 2.15.2: Gráficos y visualizaciones de datos.
+   - WebSocket (ws 8.18.0): Comunicación bidireccional en tiempo real.
 
 ═══════════════════════════════════════════════════════════════════
 
-7. INSTRUCCIONES DE EJECUCIÓN
+7. SISTEMA DE CALIFICACIONES COLOMBIANO
 
-   Para iniciar el sistema completo:
+   El sistema implementa la escala de calificación colombiana (1.0 - 5.0):
 
-   1. El Backend (Java) inicia el servidor en el puerto 7000.
-   2. El servidor Java también se encarga de entregar los archivos del Frontend.
-   3. Acceder desde el navegador a: http://localhost:7000
+   ESCALA DE CONVERSIÓN:
+   ┌──────────────┬─────────┬──────────────┐
+   │ Calificación │  Valor  │  Descripción │
+   ├──────────────┼─────────┼──────────────┤
+   │ A (≥ 90%)    │  5.0    │  Excelente   │
+   │ B (80-89%)   │  4.5    │  Sobresaliente│
+   │ C (70-79%)   │  4.0    │  Aceptable   │
+   │ D (60-69%)   │  3.0    │  Insuficiente│
+   │ F (< 60%)    │  1.0-2.9│  Reprobado   │
+   └──────────────┴─────────┴──────────────┘
+
+   IMPLEMENTACIÓN:
+   - La conversión se realiza en el frontend (reports.tsx).
+   - Fórmula para calificaciones < 60%: 1.0 + (grade / 60) * 2.0
+   - Nota mínima aprobatoria: 3.0 (equivalente a 60%).
+
+═══════════════════════════════════════════════════════════════════
+
+8. API REST - ENDPOINTS DETALLADOS
+
+   El backend expone una API RESTful completa:
+
+   A. ESTUDIANTES (/api/students)
+      GET    /api/students          → Listar todos los estudiantes
+      POST   /api/students          → Crear nuevo estudiante
+      PATCH  /api/students/{id}     → Actualizar estudiante existente
+      DELETE /api/students/{id}     → Eliminar estudiante
+
+   B. PROFESORES (/api/professors)
+      GET    /api/professors        → Listar todos los profesores
+      POST   /api/professors        → Crear nuevo profesor
+      PATCH  /api/professors/{id}   → Actualizar profesor existente
+      DELETE /api/professors/{id}   → Eliminar profesor
+
+   C. CURSOS (/api/courses)
+      GET    /api/courses           → Listar todos los cursos
+      POST   /api/courses           → Crear nuevo curso
+      PATCH  /api/courses/{id}      → Actualizar curso existente
+      DELETE /api/courses/{id}      → Eliminar curso
+
+   D. INSCRIPCIONES (/api/enrollments)
+      GET    /api/enrollments       → Listar todas las inscripciones
+      POST   /api/enrollments       → Inscribir estudiante en curso
+      PATCH  /api/enrollments/{id}  → Actualizar inscripción
+      DELETE /api/enrollments/{id}  → Eliminar inscripción
+
+   E. CALIFICACIONES (/api/grades)
+      GET    /api/grades            → Listar todas las calificaciones
+      POST   /api/grades            → Registrar nueva calificación
+      PATCH  /api/grades/{id}       → Actualizar calificación
+      DELETE /api/grades/{id}       → Eliminar calificación
+
+   F. REPORTES
+      GET    /api/boletin/{id}      → Obtener boletín de estudiante específico
+      GET    /api/reporte/resumen   → Resumen general del sistema
+
+   G. WEBSOCKET
+      WS     /api/ws                → Conexión WebSocket para actualizaciones en tiempo real
+
+   FORMATO DE RESPUESTA:
+   - Todas las respuestas son en formato JSON.
+   - Códigos HTTP estándar: 200 (OK), 201 (Created), 400 (Bad Request), 404 (Not Found).
+
+═══════════════════════════════════════════════════════════════════
+
+9. ESTRUCTURA DE DATOS (data.json)
+
+   El sistema persiste los datos en un archivo JSON con la siguiente estructura:
+
+   {
+     "estudiantes": [
+       {
+         "id": "uuid-generado",
+         "studentId": "código-estudiante",
+         "firstName": "nombre",
+         "lastName": "apellido",
+         "email": "correo@ejemplo.com",
+         "phone": "+57...",
+         "program": "programa-académico",
+         "semester": número,
+         "status": "active|inactive"
+       }
+     ],
+     "profesores": [...],
+     "cursos": [...],
+     "inscripciones": [...],
+     "calificaciones": [...],
+     "usuarios": [...]
+   }
+
+   NOTAS IMPORTANTES:
+   - Las claves están en inglés (firstName, lastName) para consistencia con el código.
+   - Los IDs son UUIDs generados automáticamente.
+   - El archivo se actualiza automáticamente con cada operación CRUD.
+   - Se usa ConcurrentHashMap en memoria para rendimiento óptimo.
+
+═══════════════════════════════════════════════════════════════════
+
+10. COMUNICACIÓN EN TIEMPO REAL (WebSocket)
+
+    El sistema usa WebSockets para sincronización instantánea:
+
+    FUNCIONAMIENTO:
+    1. Los clientes se conectan a ws://localhost:7000/api/ws
+    2. Cuando ocurre un cambio (crear/actualizar/eliminar), el servidor envía:
+       {
+         "type": "UPDATE",
+         "entity": "students|professors|courses|enrollments|grades",
+         "data": {...}
+       }
+    3. Todos los clientes conectados reciben la actualización.
+    4. El frontend actualiza automáticamente la interfaz sin recargar.
+
+    VENTAJAS:
+    - Múltiples usuarios pueden trabajar simultáneamente.
+    - Los cambios se reflejan instantáneamente en todas las sesiones.
+    - No requiere polling ni recargas manuales.
+
+═══════════════════════════════════════════════════════════════════
+
+11. PROCESO DE COMPILACIÓN Y DESPLIEGUE
+
+    COMPILACIÓN COMPLETA (Producción):
+
+    Paso 1 - Compilar Frontend:
+    cd client
+    npm install
+    npm run build
+    → Genera archivos estáticos en: src/main/resources/public/
+
+    Paso 2 - Empaquetar Backend con Frontend incluido:
+    mvn clean package -DskipTests
+    → Genera JAR ejecutable en: target/gestion-universitaria-1.0.jar
+
+    Paso 3 - Ejecutar aplicación:
+    java -jar target/gestion-universitaria-1.0.jar
+    → Servidor inicia en: http://localhost:7000
+
+    MODO DESARROLLO (Hot Reload):
+
+    Terminal 1 - Backend:
+    mvn compile exec:java
+    → Backend en puerto 7000
+
+    Terminal 2 - Frontend:
+    cd client
+    npm run dev
+    → Frontend en puerto 5173 (con proxy a backend en puerto 7000)
+
+    CONFIGURACIÓN DEL PROXY:
+    - Definido en client/vite.config.ts
+    - Redirige /api/* → http://localhost:7000/api/*
+    - Permite desarrollo frontend independiente del backend.
+
+═══════════════════════════════════════════════════════════════════
+
+12. CÓMO FUNCIONA (FLUJO DE EJEMPLO)
+
+    Cuando un usuario crea un nuevo estudiante:
+
+    1. El usuario llena el formulario en la web (Frontend).
+    2. React Hook Form valida los datos del lado del cliente.
+    3. La web envía una petición POST a /api/students (Backend).
+    4. El servidor valida que los datos estén correctos (ej. email válido).
+    5. El servidor genera un UUID único para el estudiante.
+    6. El servidor guarda el nuevo estudiante en data.json.
+    7. El servidor actualiza el ConcurrentHashMap en memoria.
+    8. El servidor envía un mensaje WebSocket a todos los clientes conectados.
+    9. La lista de estudiantes se actualiza automáticamente en la pantalla de todos.
+    10. TanStack Query invalida y refresca la caché automáticamente.
+
+═══════════════════════════════════════════════════════════════════
+
+13. INSTRUCCIONES DE EJECUCIÓN
+
+    OPCIÓN 1 - PRODUCCIÓN (Recomendado para uso final):
+    
+    java -jar target/gestion-universitaria-1.0.jar
+    
+    Acceder desde el navegador a: http://localhost:7000
+
+    OPCIÓN 2 - DESARROLLO (Recomendado para programar):
+    
+    Terminal 1: mvn compile exec:java
+    Terminal 2: cd client && npm run dev
+    
+    Acceder desde el navegador a: http://localhost:5173
+
+    REQUISITOS DEL SISTEMA:
+    - Java 17 o superior
+    - Maven 3.6+
+    - Node.js 18+ y npm (solo para desarrollo)
+    - Navegador moderno (Chrome, Firefox, Edge, Safari)
+
+═══════════════════════════════════════════════════════════════════
+
+14. SOLUCIÓN DE PROBLEMAS COMUNES
+
+    A. Puerto 7000 ocupado:
+       Windows: netstat -ano | findstr :7000
+                taskkill /PID <PID> /F
+       Linux/Mac: lsof -ti:7000 | xargs kill -9
+       
+       O cambiar el puerto en src/main/java/app/Main.java
+
+    B. Error al compilar frontend:
+       cd client
+       rm -rf node_modules package-lock.json
+       npm install
+       npm run build
+
+    C. Error de versión de Java:
+       Verificar: java -version
+       Debe mostrar versión 17 o superior.
+
+    D. Datos no se guardan:
+       Verificar permisos de escritura en data.json
+       Verificar que el archivo no esté en uso por otro proceso.
+
+    E. WebSocket no conecta:
+       Verificar que el backend esté ejecutándose.
+       Revisar la consola del navegador para errores.
+       Verificar firewall/antivirus no bloquee el puerto.
 
 ═══════════════════════════════════════════════════════════════════

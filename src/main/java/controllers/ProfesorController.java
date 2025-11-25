@@ -5,6 +5,7 @@ import models.Profesor;
 import utils.DataStore;
 import utils.Validador;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProfesorController {
     private static final DataStore db = DataStore.get();
@@ -13,9 +14,20 @@ public class ProfesorController {
         ctx.json(db.profesores.values());
     }
 
+    public record ProfesorRequest(
+            @JsonProperty("professorId") String codigoProfesor,
+            @JsonProperty("firstName") String nombre,
+            @JsonProperty("lastName") String apellido,
+            String email,
+            @JsonProperty("phone") String telefono,
+            @JsonProperty("department") String departamento,
+            @JsonProperty("specialization") String especializacion,
+            String status) {
+    }
+
     public static void create(Context ctx) {
         try {
-            Profesor b = ctx.bodyAsClass(Profesor.class);
+            ProfesorRequest b = ctx.bodyAsClass(ProfesorRequest.class);
             Validador.require(Validador.texto(b.nombre()), "Nombre requerido");
             Validador.require(Validador.texto(b.apellido()), "Apellido requerido");
             Validador.require(Validador.email(b.email()), "Email inválido");
@@ -43,7 +55,7 @@ public class ProfesorController {
     public static void update(Context ctx) {
         try {
             String id = ctx.pathParam("id");
-            Profesor b = ctx.bodyAsClass(Profesor.class);
+            ProfesorRequest b = ctx.bodyAsClass(ProfesorRequest.class);
             if (!db.profesores.containsKey(id))
                 throw new IllegalArgumentException("Profesor no encontrado");
 

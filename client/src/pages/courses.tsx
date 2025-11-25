@@ -133,7 +133,11 @@ export default function Courses() {
   );
 
   const onSubmit = (data: InsertCourse) => {
-    createMutation.mutate(data);
+    const formattedData = {
+      ...data,
+      professorId: (data.professorId === "unassigned" || data.professorId === "") ? null : data.professorId
+    };
+    createMutation.mutate(formattedData);
   };
 
   const getProfessorName = (professorId: string | null) => {
@@ -478,14 +482,14 @@ export default function Courses() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Profesor (Opcional)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || "unassigned"}>
                         <FormControl>
                           <SelectTrigger data-testid="select-professor">
                             <SelectValue placeholder="Seleccionar profesor" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Sin asignar</SelectItem>
+                          <SelectItem value="unassigned">Sin asignar</SelectItem>
                           {professors?.map((prof) => (
                             <SelectItem key={prof.id} value={prof.id}>
                               {prof.firstName} {prof.lastName} - {prof.department}
