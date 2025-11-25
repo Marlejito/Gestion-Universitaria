@@ -10,517 +10,275 @@ REPOSITORIO: https://github.com/Marlejito/Gestion-Universitaria
 
 ÍNDICE
 ------
-1. Descripción General del Sistema
-2. Tecnologías Utilizadas y Justificación
-3. Arquitectura del Sistema
-4. Backend - Implementación en Java
-5. Frontend - Implementación en React + TypeScript
+1. ¿Qué es el Sistema de Gestión Universitaria?
+2. Tecnologías: El Equipo Detrás del Sistema
+3. Arquitectura: Cómo Funciona Todo Junto
+4. El Cerebro del Sistema: Backend en Java
+5. La Cara del Sistema: Frontend en React
 6. Sistema de Calificaciones Colombiano
-7. API REST y Comunicación
-8. Funcionalidades Principales
-9. Flujo de Datos Completo
-10. Instalación y Ejecución
+7. Funcionalidades Principales
+8. Cómo Iniciar el Proyecto
 
 ═══════════════════════════════════════════════════════════════════
-1. DESCRIPCIÓN GENERAL DEL SISTEMA
+1. ¿QUÉ ES EL SISTEMA DE GESTIÓN UNIVERSITARIA?
 ═══════════════════════════════════════════════════════════════════
 
-El Sistema de Gestión Universitaria es una aplicación web full-stack diseñada
-para administrar de manera integral todos los aspectos académicos de una
-institución educativa.
-
-OBJETIVO:
-Proporcionar una plataforma moderna, eficiente y fácil de usar para gestionar:
-- Estudiantes y sus datos académicos
-- Profesores y sus asignaciones
-- Cursos y programas académicos
-- Inscripciones de estudiantes en cursos
-- Calificaciones con escala colombiana (1.0-5.0)
-- Reportes y analítica académica
+Imagina una universidad donde toda la información académica está organizada
+en un solo lugar: estudiantes, profesores, cursos, inscripciones y 
+calificaciones. Este sistema es como un asistente digital que ayuda a
+administrar toda esa información de manera eficiente y moderna.
 
 CARACTERÍSTICAS DESTACADAS:
-✓ Interfaz 100% en español
-✓ Sistema de calificaciones colombiano (escala 1.0-5.0)
-✓ Actualizaciones en tiempo real con WebSockets
-✓ Diseño moderno y responsivo (modo claro/oscuro)
-✓ API REST completa (25+ endpoints)
-✓ Validación robusta en frontend y backend
-✓ Persistencia en JSON para portabilidad
+✓ Todo en español - Diseñado para usuarios hispanohablantes
+✓ Calificaciones colombianas - Escala de 1.0 a 5.0, como en Colombia
+✓ Actualizaciones instantáneas - Si alguien hace un cambio, todos lo ven
+✓ Diseño moderno - Interfaz bonita con modo claro y oscuro
+✓ Fácil de usar - Formularios intuitivos y búsquedas rápidas
+
+OBJETIVO:
+Hacer que la gestión académica sea simple, rápida y accesible para todos.
 
 ═══════════════════════════════════════════════════════════════════
-2. TECNOLOGÍAS UTILIZADAS Y JUSTIFICACIÓN
+2. TECNOLOGÍAS: EL EQUIPO DETRÁS DEL SISTEMA
 ═══════════════════════════════════════════════════════════════════
 
-BACKEND - JAVA
---------------
-• Java 17: Lenguaje robusto, seguro y orientado a objetos
-  - Tipado estático previene errores en tiempo de compilación
-  - Excelente rendimiento y escalabilidad
-  - Gran ecosistema de librerías empresariales
+Piensa en las tecnologías como un equipo de trabajo donde cada uno tiene
+un rol específico:
 
-• Javalin 5.6.3: Framework web ligero y moderno
-  - Similar a Express.js pero para Java
-  - Fácil de aprender y usar
-  - Soporte nativo para WebSockets
+EL CEREBRO - BACKEND (Java)
+---------------------------
+• Java 17: El "gerente" que toma decisiones importantes
+  - Robusto y confiable, como un profesional experimentado
+  - Previene errores antes de que ocurran
+  - Maneja múltiples usuarios al mismo tiempo sin confundirse
 
-• Jackson 2.15.2: Procesamiento JSON
-  - Serialización/deserialización automática
-  - Manejo eficiente de objetos Java ↔ JSON
+• Javalin: El "recepcionista" que atiende peticiones
+  - Ligero y rápido, no complica las cosas
+  - Recibe solicitudes y las dirige al lugar correcto
 
-• Maven: Gestión de dependencias y build
-  - Automatiza la compilación del proyecto
-  - Gestiona dependencias de forma declarativa
+• Jackson: El "traductor" entre Java y datos
+  - Convierte información de Java a formato JSON y viceversa
+  - Como alguien que habla dos idiomas perfectamente
 
-FRONTEND - REACT + TYPESCRIPT
-------------------------------
-• React 18.3.1: Biblioteca para interfaces de usuario
-  - Componentes reutilizables
-  - Virtual DOM para rendimiento óptimo
-  - Gran comunidad y ecosistema
+• Maven: El "organizador" del proyecto
+  - Mantiene todo en orden y listo para funcionar
+  - Descarga y organiza las herramientas necesarias
 
-• TypeScript 5.6.3: JavaScript con tipado estático
-  - Detecta errores antes de ejecutar el código
-  - Autocompletado inteligente en el editor
-  - Refactorización segura
+LA CARA - FRONTEND (React + TypeScript)
+----------------------------------------
+• React: El "diseñador de interfaces"
+  - Crea páginas web interactivas y modernas
+  - Como bloques de LEGO que se pueden reutilizar
 
-• Vite 5.4.20: Build tool ultrarrápido
-  - Hot Module Replacement (HMR) instantáneo
-  - Build optimizado para producción
+• TypeScript: El "corrector de errores"
+  - JavaScript con superpoderes
+  - Detecta problemas antes de que el usuario los vea
 
-• Tailwind CSS 3.4.17: Framework CSS utility-first
-  - Diseño rápido y consistente
-  - Personalizable y responsivo
+• Vite: El "constructor ultrarrápido"
+  - Construye la aplicación en segundos
+  - Muestra cambios instantáneamente mientras desarrollas
 
-• TanStack Query 5.60.5: Gestión de estado del servidor
-  - Caché automático de datos
-  - Refetch y sincronización automática
+• Tailwind CSS: El "estilista"
+  - Hace que todo se vea bonito y profesional
+  - Diseño responsivo que funciona en celular y computadora
 
-• React Hook Form 7.55.0: Gestión de formularios
-  - Rendimiento optimizado
-  - Validación integrada
+• TanStack Query: El "bibliotecario inteligente"
+  - Guarda información para no pedirla dos veces
+  - Mantiene los datos actualizados automáticamente
 
-• Zod 3.24.2: Validación de esquemas
-  - Validación en tiempo de ejecución
-  - Tipos TypeScript automáticos
+• Zod: El "inspector de calidad"
+  - Verifica que la información esté completa y correcta
+  - Como un guardia de seguridad para los datos
 
-BASE DE DATOS
--------------
-• JSON (data.json): Almacenamiento en archivo
-  - Portabilidad total
-  - Fácil de leer y editar
-  - No requiere servidor de base de datos
+LA MEMORIA - BASE DE DATOS
+---------------------------
+• JSON (data.json): El "archivo maestro"
+  - Como un cuaderno donde se apunta todo
+  - Fácil de leer, editar y transportar
+  - La información sobrevive aunque se apague el sistema
 
-• ConcurrentHashMap: Caché en memoria
-  - Acceso thread-safe
-  - Lecturas muy rápidas (O(1))
+• ConcurrentHashMap: La "memoria RAM"
+  - Guarda información en la memoria para acceso ultrarrápido
+  - Permite que varios usuarios trabajen al mismo tiempo sin problemas
 
 ═══════════════════════════════════════════════════════════════════
-3. ARQUITECTURA DEL SISTEMA
+3. ARQUITECTURA: CÓMO FUNCIONA TODO JUNTO
 ═══════════════════════════════════════════════════════════════════
 
-El sistema sigue una ARQUITECTURA DE 3 CAPAS:
+El sistema funciona como una empresa con 3 departamentos que trabajan juntos:
 
 ┌─────────────────────────────────────────────────────────────┐
-│                  CAPA DE PRESENTACIÓN                        │
-│  React + TypeScript + Tailwind CSS (Puerto 5173 en dev)     │
-│  • Componentes UI (shadcn/ui)                                │
-│  • Gestión de estado (React Query)                           │
-│  • Formularios (React Hook Form + Zod)                       │
-│  • Routing (Wouter)                                          │
+│              DEPARTAMENTO DE ATENCIÓN AL CLIENTE             │
+│                    (Lo que ves en pantalla)                  │
+│  React + TypeScript - Puerto 5173 en desarrollo              │
+│  • Formularios bonitos y fáciles de usar                     │
+│  • Tablas organizadas con búsqueda                           │
+│  • Gráficos y estadísticas visuales                          │
 └─────────────────────────────────────────────────────────────┘
-                        ↕ HTTP/REST + WebSocket
+                        ↕ Comunicación constante
 ┌─────────────────────────────────────────────────────────────┐
-│                  CAPA DE APLICACIÓN                          │
-│  Java + Javalin (Puerto 7000)                                │
-│  • Controladores REST (6 controladores)                      │
-│  • Validación de datos                                       │
-│  • Lógica de negocio                                         │
-│  • WebSocket para tiempo real                                │
+│              DEPARTAMENTO DE PROCESAMIENTO                   │
+│                  (El cerebro que piensa)                     │
+│  Java + Javalin - Puerto 7000                                │
+│  • Recibe solicitudes (crear estudiante, ver cursos, etc.)   │
+│  • Valida que todo esté correcto                             │
+│  • Toma decisiones según las reglas del negocio              │
+│  • Notifica cambios a todos los usuarios conectados          │
 └─────────────────────────────────────────────────────────────┘
-                        ↕ Lectura/Escritura
+                        ↕ Lee y escribe
 ┌─────────────────────────────────────────────────────────────┐
-│                  CAPA DE DATOS                               │
-│  DataStore (JSON + ConcurrentHashMap)                        │
-│  • Persistencia en data.json                                 │
-│  • Caché en memoria para rendimiento                         │
-│  • Sincronización automática                                 │
+│              DEPARTAMENTO DE ARCHIVO                         │
+│                (La memoria del sistema)                      │
+│  JSON + Caché en Memoria                                     │
+│  • Guarda toda la información en data.json                   │
+│  • Mantiene copias en memoria para velocidad                 │
+│  • Sincroniza automáticamente los cambios                    │
 └─────────────────────────────────────────────────────────────┘
 
-FLUJO DE DATOS COMPLETO (Ejemplo: Crear Estudiante):
+EJEMPLO DE CÓMO FUNCIONA:
+Cuando un usuario crea un nuevo estudiante:
 
-1. Usuario llena formulario en React
-2. React Hook Form + Zod validan datos (cliente)
-3. Se envía POST a /api/students
-4. Javalin recibe y enruta al EstudianteController
-5. Controlador valida datos (servidor)
-6. Se genera UUID único
-7. DataStore guarda en data.json y caché
-8. Se envía respuesta HTTP 201 con estudiante creado
-9. WebSocket notifica a todos los clientes conectados
-10. React Query actualiza la UI automáticamente
+1. 📝 Usuario llena el formulario en la pantalla
+2. ✅ El sistema verifica que todo esté bien (email válido, campos completos)
+3. 📤 La información viaja al cerebro del sistema (backend)
+4. 🔍 El cerebro valida nuevamente y genera un ID único
+5. 💾 Se guarda en el archivo JSON (la memoria permanente)
+6. ⚡ Se guarda también en la memoria rápida (caché)
+7. 📢 Se notifica a todos los usuarios conectados
+8. 🔄 Las pantallas se actualizan automáticamente
+9. ✨ ¡Listo! El estudiante está registrado
 
-═══════════════════════════════════════════════════════════════════
-4. BACKEND - IMPLEMENTACIÓN EN JAVA
-═══════════════════════════════════════════════════════════════════
-
-ESTRUCTURA DEL BACKEND:
-
-src/main/java/
-├── app/
-│   └── Main.java              # Punto de entrada, configuración Javalin
-├── controllers/               # 6 controladores REST
-│   ├── EstudianteController.java
-│   ├── ProfesorController.java
-│   ├── CursoController.java
-│   ├── InscripcionController.java
-│   ├── CalificacionController.java
-│   └── ReporteController.java
-├── models/                    # 5 modelos de datos
-│   ├── Estudiante.java
-│   ├── Profesor.java
-│   ├── Curso.java
-│   ├── Inscripcion.java
-│   └── Calificacion.java
-└── utils/
-    ├── DataStore.java         # Persistencia JSON + caché
-    └── Validator.java         # Validación de datos
-
-CÓDIGO PRINCIPAL - Main.java:
-------------------------------
-
-```java
-public class Main {
-    public static void main(String[] args) {
-        // 1. Inicializar la base de datos
-        DataStore.get();
-        
-        // 2. Crear y configurar la aplicación Javalin
-        Javalin app = Javalin.create(config -> {
-            // Habilitar CORS para desarrollo
-            config.plugins.enableCors(cors -> cors.add(it -> it.anyHost()));
-        }).start(7000);  // Puerto 7000
-        
-        // 3. Configurar WebSocket para actualizaciones en tiempo real
-        app.ws("/api/ws", ws -> {
-            ws.onConnect(ctx -> Controlador.wsClients.add(ctx));
-            ws.onClose(ctx -> Controlador.wsClients.remove(ctx));
-        });
-        
-        // 4. Registrar rutas de la API
-        app.get("/api/students", EstudianteController::getAll);
-        app.post("/api/students", EstudianteController::create);
-        app.patch("/api/students/{id}", EstudianteController::update);
-        app.delete("/api/students/{id}", EstudianteController::delete);
-        
-        // Similar para profesores, cursos, inscripciones, calificaciones...
-        
-        System.out.println("✅ Sistema listo en http://localhost:7000");
-    }
-}
-```
-
-EXPLICACIÓN:
-- Javalin: Framework web ligero, similar a Express.js
-- CORS: Permite peticiones desde el frontend en desarrollo
-- WebSocket: Comunicación bidireccional para tiempo real
-- Routing: Cada ruta HTTP se mapea a un método de controlador
-
-CONTROLADOR - EstudianteController.java:
------------------------------------------
-
-```java
-public class EstudianteController extends Controlador {
-    
-    // GET /api/students - Obtener todos los estudiantes
-    public static void getAll(Context ctx) {
-        List<Estudiante> estudiantes = DataStore.get().getEstudiantes();
-        ctx.json(estudiantes);
-    }
-    
-    // POST /api/students - Crear un nuevo estudiante
-    public static void create(Context ctx) {
-        try {
-            // 1. Parsear el JSON del cuerpo de la petición
-            Estudiante estudiante = ctx.bodyAsClass(Estudiante.class);
-            
-            // 2. Validar los datos
-            Validator.validateEstudiante(estudiante);
-            
-            // 3. Generar ID único
-            estudiante.setId(UUID.randomUUID().toString());
-            
-            // 4. Guardar en la base de datos
-            DataStore.get().addEstudiante(estudiante);
-            
-            // 5. Notificar a clientes WebSocket
-            notifyClients("student_created", estudiante);
-            
-            // 6. Responder con el estudiante creado
-            ctx.status(201).json(estudiante);
-            
-        } catch (ValidationException e) {
-            ctx.status(400).json(Map.of("error", e.getMessage()));
-        }
-    }
-    
-    // PATCH /api/students/{id} - Actualizar estudiante
-    public static void update(Context ctx) {
-        String id = ctx.pathParam("id");
-        Estudiante updates = ctx.bodyAsClass(Estudiante.class);
-        
-        Estudiante existing = DataStore.get().getEstudiante(id);
-        if (existing == null) {
-            ctx.status(404).json(Map.of("error", "Estudiante no encontrado"));
-            return;
-        }
-        
-        // Actualizar solo los campos proporcionados
-        if (updates.getFirstName() != null) {
-            existing.setFirstName(updates.getFirstName());
-        }
-        // ... más campos
-        
-        DataStore.get().updateEstudiante(existing);
-        notifyClients("student_updated", existing);
-        ctx.json(existing);
-    }
-    
-    // DELETE /api/students/{id} - Eliminar estudiante
-    public static void delete(Context ctx) {
-        String id = ctx.pathParam("id");
-        
-        if (DataStore.get().deleteEstudiante(id)) {
-            notifyClients("student_deleted", Map.of("id", id));
-            ctx.status(204);
-        } else {
-            ctx.status(404).json(Map.of("error", "Estudiante no encontrado"));
-        }
-    }
-}
-```
-
-PATRÓN COMÚN EN CONTROLADORES:
-1. Recibir petición HTTP (Context ctx)
-2. Extraer parámetros (path params, query params, body)
-3. Validar datos
-4. Interactuar con DataStore
-5. Notificar cambios vía WebSocket
-6. Enviar respuesta JSON
-
-PERSISTENCIA - DataStore.java:
--------------------------------
-
-```java
-public class DataStore {
-    private static DataStore instance;
-    private static final String DATA_FILE = "data.json";
-    
-    // Caché en memoria (thread-safe)
-    private ConcurrentHashMap<String, Estudiante> estudiantes;
-    private ConcurrentHashMap<String, Profesor> profesores;
-    private ConcurrentHashMap<String, Curso> cursos;
-    private ConcurrentHashMap<String, Inscripcion> inscripciones;
-    private ConcurrentHashMap<String, Calificacion> calificaciones;
-    
-    private ObjectMapper mapper;  // Jackson para JSON
-    
-    // Singleton pattern
-    public static synchronized DataStore get() {
-        if (instance == null) {
-            instance = new DataStore();
-        }
-        return instance;
-    }
-    
-    private DataStore() {
-        mapper = new ObjectMapper();
-        estudiantes = new ConcurrentHashMap<>();
-        profesores = new ConcurrentHashMap<>();
-        cursos = new ConcurrentHashMap<>();
-        inscripciones = new ConcurrentHashMap<>();
-        calificaciones = new ConcurrentHashMap<>();
-        loadData();  // Cargar datos desde data.json
-    }
-    
-    // Guardar datos a JSON
-    private synchronized void saveData() {
-        try {
-            Map<String, Object> data = new HashMap<>();
-            data.put("estudiantes", estudiantes.values());
-            data.put("profesores", profesores.values());
-            data.put("cursos", cursos.values());
-            data.put("inscripciones", inscripciones.values());
-            data.put("calificaciones", calificaciones.values());
-            
-            mapper.writerWithDefaultPrettyPrinter()
-                  .writeValue(new File(DATA_FILE), data);
-                  
-        } catch (IOException e) {
-            System.err.println("Error guardando datos: " + e.getMessage());
-        }
-    }
-    
-    // CRUD Operations
-    public void addEstudiante(Estudiante e) {
-        estudiantes.put(e.getId(), e);
-        saveData();  // Persistir cambios
-    }
-    
-    public List<Estudiante> getEstudiantes() {
-        return new ArrayList<>(estudiantes.values());
-    }
-    
-    // ... más operaciones CRUD
-}
-```
-
-VENTAJAS DE ESTE ENFOQUE:
-- ConcurrentHashMap: Acceso thread-safe para múltiples usuarios
-- Caché en memoria: Lecturas muy rápidas (O(1))
-- Persistencia JSON: Datos sobreviven reinicios
-- Sincronización automática: Cada cambio se guarda inmediatamente
+Todo esto pasa en menos de un segundo.
 
 ═══════════════════════════════════════════════════════════════════
-5. FRONTEND - IMPLEMENTACIÓN EN REACT + TYPESCRIPT
+4. EL CEREBRO DEL SISTEMA: BACKEND EN JAVA
 ═══════════════════════════════════════════════════════════════════
 
-ESTRUCTURA DEL FRONTEND:
+El backend es como el cerebro de una empresa bien organizada:
 
-client/src/
-├── pages/                    # 6 páginas principales (rutas)
-│   ├── dashboard.tsx         # Panel principal con estadísticas
-│   ├── students.tsx          # CRUD de estudiantes
-│   ├── professors.tsx        # CRUD de profesores
-│   ├── courses.tsx           # CRUD de cursos
-│   ├── enrollments.tsx       # Gestión de inscripciones
-│   └── reports.tsx           # Reportes y analítica
-├── components/
-│   ├── ui/                   # 50+ componentes base (shadcn/ui)
-│   ├── app-sidebar.tsx       # Barra lateral de navegación
-│   └── theme-provider.tsx    # Proveedor de tema claro/oscuro
-├── lib/
-│   ├── queryClient.ts        # Configuración React Query
-│   └── utils.ts              # Utilidades
-├── hooks/
-│   └── use-toast.tsx         # Hook para notificaciones
-└── shared/
-    └── schema.ts             # Esquemas Zod compartidos
+ESTRUCTURA ORGANIZACIONAL:
 
-EJEMPLO - students.tsx (Gestión de Estudiantes):
--------------------------------------------------
+📂 Main.java - El Director General
+   • Inicia todo el sistema
+   • Configura las comunicaciones
+   • Abre las puertas para recibir visitantes (puerto 7000)
+   • Establece las reglas de seguridad (CORS)
+   • Activa el sistema de notificaciones en tiempo real (WebSocket)
 
-```typescript
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { insertStudentSchema, type Student } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+📂 Controladores - Los Gerentes de Departamento (6 en total)
+   • EstudianteController: Gerente de estudiantes
+   • ProfesorController: Gerente de profesores
+   • CursoController: Gerente de cursos
+   • InscripcionController: Gerente de inscripciones
+   • CalificacionController: Gerente de calificaciones
+   • ReporteController: Gerente de reportes
 
-export default function Students() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { toast } = useToast();
-  
-  // 1. OBTENER DATOS CON REACT QUERY
-  const { data: students, isLoading } = useQuery<Student[]>({
-    queryKey: ["/api/students"],  // Clave única para caché
-  });
-  
-  // 2. CONFIGURAR FORMULARIO CON VALIDACIÓN ZOD
-  const form = useForm<InsertStudent>({
-    resolver: zodResolver(insertStudentSchema),
-    defaultValues: {
-      studentId: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      program: "",
-      semester: 1,
-      status: "active",
-    },
-  });
-  
-  // 3. MUTACIÓN PARA CREAR ESTUDIANTE
-  const createMutation = useMutation({
-    mutationFn: (data: InsertStudent) => 
-      apiRequest("POST", "/api/students", data),
-    onSuccess: () => {
-      // Invalidar caché para refrescar datos
-      queryClient.invalidateQueries({ queryKey: ["/api/students"] });
-      setIsDialogOpen(false);
-      form.reset();
-      toast({
-        title: "Éxito",
-        description: "Estudiante creado exitosamente",
-      });
-    },
-  });
-  
-  // 4. FILTRAR ESTUDIANTES POR BÚSQUEDA
-  const filteredStudents = students?.filter(
-    (student) =>
-      student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  // 5. RENDERIZAR UI (tabla, formularios, etc.)
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header, búsqueda, tabla, formulario... */}
-    </div>
-  );
-}
-```
+   Cada gerente:
+   - Recibe solicitudes de los usuarios
+   - Verifica que todo esté en orden
+   - Delega el trabajo al departamento correcto
+   - Responde con los resultados
+   - Notifica a otros cuando hay cambios importantes
 
-CONCEPTOS CLAVE:
-- React Query: Gestión de estado del servidor (caché, refetch automático)
-- React Hook Form: Gestión de formularios con validación
-- Zod: Validación de esquemas TypeScript-first
-- shadcn/ui: Componentes UI accesibles y personalizables
+📂 Modelos - Las Plantillas de Información (5 tipos)
+   • Estudiante: Qué información tiene un estudiante
+   • Profesor: Qué información tiene un profesor
+   • Curso: Qué información tiene un curso
+   • Inscripcion: Cómo se relacionan estudiantes y cursos
+   • Calificacion: Cómo se registran las notas
 
-VALIDACIÓN CON ZOD - shared/schema.ts:
----------------------------------------
+📂 DataStore - El Archivista Principal
+   • Es el único responsable de guardar y recuperar información
+   • Mantiene todo organizado en memoria para velocidad
+   • Guarda copias permanentes en el archivo JSON
+   • Asegura que varios usuarios puedan trabajar al mismo tiempo
+   • Sincroniza automáticamente memoria y disco
 
-```typescript
-import { z } from "zod";
+CÓMO TRABAJA EL CEREBRO:
 
-// Esquema para crear estudiante
-export const insertStudentSchema = z.object({
-  studentId: z.string().min(1, "ID de estudiante requerido"),
-  firstName: z.string().min(1, "Nombre requerido"),
-  lastName: z.string().min(1, "Apellido requerido"),
-  email: z.string().email("Email inválido"),
-  phone: z.string().optional(),
-  program: z.string().min(1, "Programa requerido"),
-  semester: z.number().min(1).max(12),
-  status: z.enum(["active", "inactive", "graduated"]),
-});
+Cuando llega una solicitud (por ejemplo, "crear un estudiante"):
 
-// Tipo TypeScript inferido del esquema
-export type InsertStudent = z.infer<typeof insertStudentSchema>;
+1. El Director (Main) recibe la llamada
+2. La dirige al Gerente correcto (EstudianteController)
+3. El Gerente verifica los documentos (validación)
+4. Le asigna un número de identificación único (UUID)
+5. Le pide al Archivista que lo guarde (DataStore)
+6. El Archivista lo anota en el cuaderno (JSON) y en su memoria
+7. El Gerente notifica a todos: "¡Nuevo estudiante registrado!"
+8. Responde al usuario: "Todo listo, aquí está la información"
 
-// Esquema completo (incluye ID generado por servidor)
-export const studentSchema = insertStudentSchema.extend({
-  id: z.string(),
-});
+VENTAJAS DE ESTA ORGANIZACIÓN:
+✓ Cada parte tiene una responsabilidad clara
+✓ Es fácil encontrar y arreglar problemas
+✓ Se puede mejorar una parte sin afectar las demás
+✓ Múltiples usuarios pueden trabajar sin interferirse
 
-export type Student = z.infer<typeof studentSchema>;
-```
+═══════════════════════════════════════════════════════════════════
+5. LA CARA DEL SISTEMA: FRONTEND EN REACT
+═══════════════════════════════════════════════════════════════════
 
-VENTAJAS DE ZOD:
-- Validación en tiempo de ejecución
-- Tipos TypeScript automáticos
-- Mensajes de error personalizados
-- Compartido entre frontend y backend
+El frontend es como la recepción de un hotel de lujo: bonito, organizado
+y fácil de usar.
+
+ESTRUCTURA DE LA RECEPCIÓN:
+
+📂 Páginas (6 salas principales)
+   • Dashboard: El lobby principal con estadísticas generales
+   • Students: Sala de gestión de estudiantes
+   • Professors: Sala de gestión de profesores
+   • Courses: Sala de catálogo de cursos
+   • Enrollments: Sala de inscripciones
+   • Reports: Sala de reportes y análisis
+
+📂 Componentes - Los Muebles Reutilizables
+   • Botones elegantes
+   • Formularios intuitivos
+   • Tablas organizadas
+   • Menús de navegación
+   • Notificaciones amigables
+   • Más de 50 componentes listos para usar
+
+📂 Herramientas Especiales
+   • React Query: El "mayordomo" que trae información
+     - Recuerda lo que ya trajo para no repetir viajes
+     - Actualiza automáticamente cuando hay cambios
+     - Muestra mensajes de "cargando..." mientras busca
+
+   • React Hook Form: El "asistente de formularios"
+     - Ayuda a llenar formularios correctamente
+     - Marca errores en rojo si algo está mal
+     - Guía al usuario paso a paso
+
+   • Zod: El "inspector de calidad"
+     - Revisa que los emails sean válidos
+     - Verifica que los números estén en el rango correcto
+     - Asegura que no falte información importante
+
+CÓMO TRABAJA LA INTERFAZ:
+
+Cuando un usuario quiere ver la lista de estudiantes:
+
+1. 🖱️ Usuario hace clic en "Estudiantes"
+2. 📞 React Query llama al backend: "Dame los estudiantes"
+3. ⏳ Mientras espera, muestra "Cargando..."
+4. 📦 Recibe la información y la guarda en su memoria
+5. 🎨 Dibuja una tabla bonita con los datos
+6. 🔍 Activa la búsqueda en tiempo real
+7. 👀 Usuario puede buscar, filtrar y ver detalles
+8. 🔄 Si alguien más agrega un estudiante, la tabla se actualiza sola
+
+CARACTERÍSTICAS ESPECIALES:
+✓ Búsqueda instantánea mientras escribes
+✓ Modo oscuro para trabajar de noche
+✓ Diseño que se adapta a celular y computadora
+✓ Notificaciones amigables de éxito o error
+✓ Formularios que te guían y previenen errores
 
 ═══════════════════════════════════════════════════════════════════
 6. SISTEMA DE CALIFICACIONES COLOMBIANO
 ═══════════════════════════════════════════════════════════════════
 
-ESCALA DE CONVERSIÓN (1.0 - 5.0):
+El sistema usa la escala de calificaciones colombiana, que va de 1.0 a 5.0:
 
 ┌──────────────┬─────────┬──────────────┐
 │ Calificación │  Valor  │  Descripción │
@@ -532,356 +290,203 @@ ESCALA DE CONVERSIÓN (1.0 - 5.0):
 │ F (< 60%)    │  1.0-2.9│  Reprobado   │
 └──────────────┴─────────┴──────────────┘
 
-IMPLEMENTACIÓN (TypeScript):
+CÓMO FUNCIONA:
+• El profesor ingresa una nota de 0 a 100
+• El sistema la convierte automáticamente a la escala colombiana
+• Por ejemplo: 85 se convierte en 4.5 (Sobresaliente)
+• La nota mínima para aprobar es 3.0 (60%)
 
-```typescript
-const calculateColombianGrade = (grade: number): number => {
-  if (grade >= 90) return 5.0;
-  if (grade >= 80) return 4.5;
-  if (grade >= 70) return 4.0;
-  if (grade >= 60) return 3.0;
-  // Escala gradual para calificaciones < 60%
-  return 1.0 + (grade / 60) * 2.0;
-};
-```
-
-CARACTERÍSTICAS:
-- Conversión automática de notas numéricas (0-100) a escala colombiana
-- Nota mínima aprobatoria: 3.0 (equivalente a 60%)
-- Cálculo de promedios ponderados por créditos
-- Visualización con gráficos de distribución
+VISUALIZACIÓN:
+El sistema muestra gráficos bonitos con:
+• Distribución de calificaciones (cuántos A, B, C, D, F)
+• Promedio general del estudiante
+• Comparación con otros cursos
+• Tendencias de rendimiento
 
 ═══════════════════════════════════════════════════════════════════
-7. API REST Y COMUNICACIÓN
-═══════════════════════════════════════════════════════════════════
-
-ENDPOINTS DISPONIBLES:
-
-ESTUDIANTES:
-  GET    /api/students          → Listar todos los estudiantes
-  POST   /api/students          → Crear nuevo estudiante
-  PATCH  /api/students/{id}     → Actualizar estudiante
-  DELETE /api/students/{id}     → Eliminar estudiante
-
-PROFESORES:
-  GET    /api/professors        → Listar todos los profesores
-  POST   /api/professors        → Crear nuevo profesor
-  PATCH  /api/professors/{id}   → Actualizar profesor
-  DELETE /api/professors/{id}   → Eliminar profesor
-
-CURSOS:
-  GET    /api/courses           → Listar todos los cursos
-  POST   /api/courses           → Crear nuevo curso
-  PATCH  /api/courses/{id}      → Actualizar curso
-  DELETE /api/courses/{id}      → Eliminar curso
-
-INSCRIPCIONES:
-  GET    /api/enrollments       → Listar todas las inscripciones
-  POST   /api/enrollments       → Inscribir estudiante en curso
-  PATCH  /api/enrollments/{id}  → Actualizar inscripción
-  DELETE /api/enrollments/{id}  → Eliminar inscripción
-
-CALIFICACIONES:
-  GET    /api/grades            → Listar todas las calificaciones
-  POST   /api/grades            → Registrar nueva calificación
-  PATCH  /api/grades/{id}       → Actualizar calificación
-  DELETE /api/grades/{id}       → Eliminar calificación
-
-REPORTES:
-  GET    /api/boletin/{id}      → Obtener boletín de estudiante
-  GET    /api/reporte/resumen   → Resumen general del sistema
-
-WEBSOCKET:
-  WS     /api/ws                → Conexión WebSocket para tiempo real
-
-FORMATO DE RESPUESTA:
-- Todas las respuestas son en formato JSON
-- Códigos HTTP estándar: 200 (OK), 201 (Created), 204 (No Content),
-  400 (Bad Request), 404 (Not Found)
-
-WEBSOCKET PARA TIEMPO REAL:
-
-Backend (Java):
-```java
-app.ws("/api/ws", ws -> {
-    ws.onConnect(ctx -> Controlador.wsClients.add(ctx));
-    ws.onClose(ctx -> Controlador.wsClients.remove(ctx));
-});
-
-protected static void notifyClients(String event, Object data) {
-    String message = mapper.writeValueAsString(
-        Map.of("event", event, "data", data)
-    );
-    wsClients.forEach(client -> client.send(message));
-}
-```
-
-Frontend (TypeScript):
-```typescript
-const ws = new WebSocket("ws://localhost:7000/api/ws");
-
-ws.onmessage = (event) => {
-  const { event: eventType, data } = JSON.parse(event.data);
-  
-  if (eventType === "student_created") {
-    queryClient.invalidateQueries(["/api/students"]);
-  }
-};
-```
-
-BENEFICIOS:
-- Actualizaciones instantáneas en todos los clientes
-- No necesita polling
-- Comunicación bidireccional
-
-═══════════════════════════════════════════════════════════════════
-8. FUNCIONALIDADES PRINCIPALES
+7. FUNCIONALIDADES PRINCIPALES
 ═══════════════════════════════════════════════════════════════════
 
 1. GESTIÓN DE ESTUDIANTES
-   - Crear, leer, actualizar, eliminar estudiantes
-   - Búsqueda por nombre, ID, email, programa
-   - Validación de datos (email, teléfono, etc.)
-   - Estados: activo, inactivo, graduado
-   - Programas académicos predefinidos
-   - Semestres de 1 a 12
+   📚 Registrar nuevos estudiantes con toda su información
+   ✏️ Editar datos personales y académicos
+   🗑️ Eliminar estudiantes (con verificación de seguridad)
+   🔍 Buscar por nombre, ID, email o programa
+   📊 Ver historial académico completo
 
 2. GESTIÓN DE PROFESORES
-   - CRUD completo de profesores
-   - Departamentos académicos
-   - Especialización (opcional)
-   - Estados: activo, inactivo, retirado
-   - Asignación a cursos
+   👨‍🏫 Registrar profesores con especialización
+   📝 Actualizar información de contacto
+   📚 Ver qué cursos enseña cada profesor
+   🏢 Organizar por departamentos
 
 3. GESTIÓN DE CURSOS
-   - Crear y administrar cursos
-   - Código de curso único
-   - Créditos académicos (1-6)
-   - Capacidad de estudiantes
-   - Asignación de profesor
-   - Horarios y aulas
-   - Semestres académicos
+   📖 Crear cursos con código único
+   👥 Definir capacidad máxima de estudiantes
+   🕐 Establecer horarios y salones
+   🎓 Asignar profesores
+   📋 Gestionar prerrequisitos
 
 4. INSCRIPCIONES
-   - Inscribir estudiantes en cursos
-   - Validación de capacidad
-   - Estados: inscrito, retirado, completado
-   - Fecha de inscripción automática
-   - Relación estudiante-curso
+   ✍️ Inscribir estudiantes en cursos
+   ✅ Validar que haya cupo disponible
+   📊 Ver quién está inscrito en cada curso
+   🔄 Gestionar estados (inscrito, completado, retirado)
 
 5. CALIFICACIONES
-   - Registro de calificaciones
-   - Escala colombiana (1.0-5.0)
-   - Letra de calificación (A-F)
-   - Fecha de calificación
-   - Vinculación con inscripción
+   📝 Registrar notas de 0 a 100
+   🔄 Conversión automática a escala colombiana
+   📊 Calcular promedios ponderados
+   📄 Generar boletines de calificaciones
 
 6. REPORTES Y ANALÍTICA
-   - Estadísticas generales del sistema
-   - Total de estudiantes, profesores, cursos
-   - Inscripciones activas y completadas
-   - Promedio general en escala colombiana
-   - Distribución de calificaciones (A-F)
-   - Gráficos y visualizaciones
+   📈 Dashboard con estadísticas generales
+   📊 Gráficos de distribución de calificaciones
+   🎓 Análisis de rendimiento académico
+   📉 Identificar tendencias y patrones
 
 7. CARACTERÍSTICAS ADICIONALES
-   - Modo claro/oscuro
-   - Diseño responsivo (desktop/móvil)
-   - Búsqueda en tiempo real
-   - Notificaciones toast
-   - Validación de formularios
-   - Actualizaciones en tiempo real (WebSocket)
-   - Interfaz completamente en español
+   🌓 Modo claro y oscuro
+   📱 Funciona en celular y computadora
+   🔍 Búsqueda en tiempo real
+   🔔 Notificaciones amigables
+   ⚡ Actualizaciones instantáneas
+   🇪🇸 Todo en español
 
 ═══════════════════════════════════════════════════════════════════
-9. FLUJO DE DATOS COMPLETO
+8. CÓMO INICIAR EL PROYECTO
 ═══════════════════════════════════════════════════════════════════
 
-EJEMPLO: CREAR UN NUEVO ESTUDIANTE
+REQUISITOS PREVIOS:
+• Java 17 o más reciente
+• Maven 3.6 o más reciente
+• Node.js 18+ y npm (solo si vas a desarrollar)
+• Un navegador moderno (Chrome, Firefox, Edge, Safari)
 
-PASO 1 - FRONTEND (Usuario llena formulario):
-```typescript
-const form = useForm<InsertStudent>({
-  resolver: zodResolver(insertStudentSchema),
-  defaultValues: {
-    studentId: "STU123",
-    firstName: "Carlos",
-    lastName: "Rodríguez",
-    email: "carlos.rodriguez@universidad.edu",
-    program: "Ingeniería",
-    semester: 2,
-    status: "active",
-  },
-});
-```
+OPCIÓN 1: MODO PRODUCCIÓN (Más Fácil)
+--------------------------------------
 
-PASO 2 - VALIDACIÓN CLIENTE (Zod):
-- Se valida que todos los campos requeridos estén presentes
-- Se valida formato de email
-- Se valida rango de semestre (1-12)
-
-PASO 3 - ENVÍO AL BACKEND:
-```typescript
-const createMutation = useMutation({
-  mutationFn: (data: InsertStudent) => 
-    apiRequest("POST", "/api/students", data),
-});
-```
-
-PASO 4 - BACKEND RECIBE (EstudianteController):
-```java
-public static void create(Context ctx) {
-    Estudiante estudiante = ctx.bodyAsClass(Estudiante.class);
-    Validator.validateEstudiante(estudiante);
-    estudiante.setId(UUID.randomUUID().toString());
-    DataStore.get().addEstudiante(estudiante);
-    notifyClients("student_created", estudiante);
-    ctx.status(201).json(estudiante);
-}
-```
-
-PASO 5 - PERSISTENCIA (DataStore):
-```java
-public void addEstudiante(Estudiante e) {
-    estudiantes.put(e.getId(), e);  // Caché en memoria
-    saveData();                      // Guardar a data.json
-}
-```
-
-PASO 6 - RESPUESTA AL FRONTEND:
-- HTTP 201 Created
-- JSON con el estudiante creado (incluye ID generado)
-
-PASO 7 - WEBSOCKET NOTIFICA A TODOS LOS CLIENTES:
-- Todos los navegadores conectados reciben el evento "student_created"
-- React Query invalida la caché automáticamente
-- La lista de estudiantes se actualiza en todas las pantallas
-
-PASO 8 - ACTUALIZACIÓN UI:
-- React Query refetch los datos
-- La tabla de estudiantes se re-renderiza
-- Se muestra notificación de éxito
-
-═══════════════════════════════════════════════════════════════════
-10. INSTALACIÓN Y EJECUCIÓN
-═══════════════════════════════════════════════════════════════════
-
-PRERREQUISITOS:
-- Java 17 o superior
-- Maven 3.6+
-- Node.js 18+ y npm (solo para desarrollo)
-- Navegador moderno (Chrome, Firefox, Edge, Safari)
-
-OPCIÓN 1: MODO PRODUCCIÓN (Recomendado)
-----------------------------------------
-
-Paso 1 - Compilar frontend:
+Paso 1 - Compilar todo:
 ```bash
-cd client
-npm install
-npm run build
-```
-→ Genera archivos estáticos en: src/main/resources/public/
-
-Paso 2 - Empaquetar backend con frontend incluido:
-```bash
-cd ..
 mvn clean package -DskipTests
 ```
-→ Genera JAR ejecutable en: target/gestion-universitaria-1.0.jar
+Este comando prepara todo el proyecto en un solo archivo.
 
-Paso 3 - Ejecutar aplicación:
+Paso 2 - Ejecutar:
 ```bash
 java -jar target/gestion-universitaria-1.0.jar
 ```
-→ Servidor inicia en: http://localhost:7000
 
-OPCIÓN 2: MODO DESARROLLO (Hot Reload)
----------------------------------------
+Paso 3 - Abrir en el navegador:
+http://localhost:7000
 
-Terminal 1 - Backend:
+¡Listo! El sistema está funcionando.
+
+OPCIÓN 2: MODO DESARROLLO (Para Programar)
+-------------------------------------------
+
+Si quieres modificar el código y ver los cambios al instante:
+
+Terminal 1 - Iniciar el backend:
 ```bash
 mvn compile exec:java
 ```
-→ Backend en puerto 7000
 
-Terminal 2 - Frontend:
+Terminal 2 - Iniciar el frontend:
 ```bash
 cd client
 npm install
 npm run dev
 ```
-→ Frontend en puerto 5173 (con proxy a backend en puerto 7000)
 
-ACCEDER A LA APLICACIÓN:
-- Producción: http://localhost:7000
-- Desarrollo: http://localhost:5173
+Abrir en el navegador:
+http://localhost:5173
+
+Ahora cualquier cambio que hagas se verá inmediatamente.
+
+SOLUCIÓN DE PROBLEMAS COMUNES:
+-------------------------------
+
+❌ "Puerto 7000 ocupado"
+   → Otro programa está usando ese puerto
+   → Ciérralo o cambia el puerto en Main.java
+
+❌ "Error al compilar"
+   → Verifica que tienes Java 17 o superior
+   → Ejecuta: java -version
+
+❌ "No se guardan los datos"
+   → Verifica permisos de escritura en data.json
+   → Asegúrate de que el archivo no esté abierto en otro programa
 
 ═══════════════════════════════════════════════════════════════════
-CONCEPTOS APRENDIDOS
+CONCEPTOS APRENDIDOS EN ESTE PROYECTO
 ═══════════════════════════════════════════════════════════════════
 
 JAVA:
-✓ Programación orientada a objetos
-✓ Manejo de colecciones (ConcurrentHashMap, ArrayList)
-✓ Serialización/deserialización JSON con Jackson
-✓ Creación de APIs REST con Javalin
-✓ Patrón Singleton (DataStore)
-✓ Manejo de excepciones
-✓ Programación concurrente (thread-safe)
+✓ Programación orientada a objetos (clases, herencia, encapsulación)
+✓ Manejo de colecciones para organizar datos
+✓ Creación de APIs REST para comunicación web
+✓ Patrón Singleton para tener una única instancia
+✓ Programación concurrente para múltiples usuarios
+✓ Manejo de excepciones para prevenir errores
 
 TYPESCRIPT/JAVASCRIPT:
 ✓ Programación funcional con React
-✓ Hooks (useState, useEffect, custom hooks)
-✓ Gestión de estado con React Query
-✓ Validación con Zod
-✓ Programación asíncrona (async/await, Promises)
-✓ Tipado estático con TypeScript
+✓ Hooks para manejar estado y efectos
+✓ Gestión de estado del servidor con React Query
+✓ Validación de datos con Zod
+✓ Programación asíncrona (async/await)
+✓ Tipado estático para prevenir errores
 
 DESARROLLO WEB:
 ✓ Arquitectura cliente-servidor
-✓ API REST (GET, POST, PATCH, DELETE)
-✓ WebSockets para tiempo real
-✓ CORS (Cross-Origin Resource Sharing)
+✓ APIs REST (GET, POST, PATCH, DELETE)
+✓ WebSockets para comunicación en tiempo real
+✓ CORS para permitir comunicación entre dominios
 ✓ Diseño responsivo con Tailwind CSS
 ✓ Componentes reutilizables
 
 HERRAMIENTAS:
-✓ Maven para gestión de dependencias Java
-✓ npm para gestión de dependencias JavaScript
-✓ Vite como build tool moderno
+✓ Maven para gestionar dependencias Java
+✓ npm para gestionar dependencias JavaScript
+✓ Vite como herramienta de construcción moderna
 ✓ Git para control de versiones
 
 ═══════════════════════════════════════════════════════════════════
 CONCLUSIÓN
 ═══════════════════════════════════════════════════════════════════
 
-El Sistema de Gestión Universitaria es un proyecto completo que demuestra
-conocimientos en:
+El Sistema de Gestión Universitaria es más que un proyecto académico:
+es una solución completa y funcional que demuestra:
 
-• Desarrollo full-stack con tecnologías modernas
-• Arquitectura de software bien diseñada
-• Implementación de APIs REST
-• Gestión de estado y persistencia de datos
-• Validación robusta en frontend y backend
-• Comunicación en tiempo real con WebSockets
-• Diseño de interfaces modernas y responsivas
-• Buenas prácticas de programación
+• Conocimiento profundo de desarrollo full-stack
+• Capacidad de diseñar arquitecturas escalables
+• Habilidad para implementar APIs REST modernas
+• Experiencia con tecnologías actuales del mercado
+• Atención al detalle en la experiencia del usuario
+• Buenas prácticas de programación y organización
 
-Este sistema es escalable, mantenible y está listo para ser utilizado
-en un entorno educativo real.
+Este sistema está listo para ser usado en un entorno educativo real
+y puede ser fácilmente extendido con nuevas funcionalidades.
 
 ═══════════════════════════════════════════════════════════════════
-REPOSITORIO Y DOCUMENTACIÓN
+DOCUMENTACIÓN Y RECURSOS
 ═══════════════════════════════════════════════════════════════════
 
 GitHub: https://github.com/Marlejito/Gestion-Universitaria
 
 Documentación adicional:
-- README.md: Guía rápida de instalación y uso
-- DOCUMENTACION_TECNICA.txt: Detalles técnicos del sistema
-- PRESENTACION_CODIGO.txt: Explicación detallada del código
+• README.md - Guía rápida de inicio
+• DOCUMENTACION_TECNICA.txt - Detalles técnicos profundos
+• PRESENTACION_CODIGO.txt - Explicación detallada del código
 
 ═══════════════════════════════════════════════════════════════════
 FIN DE LA PRESENTACIÓN
 ═══════════════════════════════════════════════════════════════════
+
+Gracias por revisar este proyecto. Espero que esta presentación haya
+sido clara y útil para entender cómo funciona el sistema y las
+tecnologías que lo hacen posible.
+
+¡El futuro de la gestión académica es digital! 🎓
