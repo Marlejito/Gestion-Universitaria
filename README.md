@@ -1,244 +1,197 @@
 # Sistema de Gestión Universitaria
 
-Sistema web completo para administración académica con interfaz React moderna y backend Java. **Completamente en español** con sistema de calificaciones (escala 1.0-5.0).
+> Sistema web completo para administración académica con **Java**, **React** y **TypeScript**
 
-## 🚀 Inicio Rápido
-
-```bash
-# 1. Compilar el proyecto
-mvn package -DskipTests
-
-# 2. Ejecutar la aplicación
-java -jar target/gestion-universitaria-1.0.jar
-```
-
-**Acceder a:** http://localhost:5173/
+[![Java](https://img.shields.io/badge/Java-17-orange)](https://www.oracle.com/java/)
+[![React](https://img.shields.io/badge/React-18.3-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/)
 
 ---
 
-## 📋 Características Principales
+## 📋 Descripción
 
-- ✅ **Gestión Completa**: Estudiantes, Profesores, Cursos, Inscripciones y Calificaciones
-- ✅ **Sistema Calificaciones**: Escala de calificaciones 1.0-5.0 (A=5.0, B=4.5, C=4.0, D=3.0, F=1.0)
-- ✅ **Interfaz en Español**: Todas las páginas, formularios y mensajes traducidos
-- ✅ **Tiempo Real**: Actualizaciones instantáneas con WebSockets
-- ✅ **Modo Oscuro**: Interfaz moderna con tema claro/oscuro
-- ✅ **Diseño Responsivo**: Optimizado para desktop y móvil
-- ✅ **Reportes y Analítica**: Estadísticas detalladas y distribución de calificaciones
+Sistema web full-stack para gestionar estudiantes, profesores, cursos, inscripciones y calificaciones en una institución educativa. Incluye interfaz moderna en español, sistema de calificaciones colombiano (escala 1.0-5.0) y actualizaciones en tiempo real.
 
----
+### ✨ Características Principales
 
-## 🏗️ Arquitectura del Proyecto
-
-```
-Proyecto Gestion Universitaria/
-├── src/main/java/              # Backend Java
-│   ├── app/
-│   │   └── Main.java           # Punto de entrada, configuración Javalin
-│   ├── controllers/            # 6 controladores REST
-│   │   ├── EstudianteController.java
-│   │   ├── ProfesorController.java
-│   │   ├── CursoController.java
-│   │   ├── InscripcionController.java
-│   │   ├── CalificacionController.java
-│   │   └── ReporteController.java
-│   ├── models/                 # 5 modelos de datos
-│   │   ├── Estudiante.java
-│   │   ├── Profesor.java
-│   │   ├── Curso.java
-│   │   ├── Inscripcion.java
-│   │   └── Calificacion.java
-│   └── utils/
-│       ├── DataStore.java      # Persistencia JSON
-│       └── Validator.java      # Validación de datos
-├── src/main/resources/
-│   ├── public/                 # Frontend compilado
-│   └── version.properties
-├── client/                     # Frontend React + TypeScript
-│   ├── src/
-│   │   ├── pages/              # 6 páginas principales
-│   │   │   ├── dashboard.tsx   # Panel principal
-│   │   │   ├── students.tsx    # Gestión de estudiantes
-│   │   │   ├── professors.tsx  # Gestión de profesores
-│   │   │   ├── courses.tsx     # Gestión de cursos
-│   │   │   ├── enrollments.tsx # Inscripciones
-│   │   │   └── reports.tsx     # Reportes y analítica
-│   │   ├── components/         # Componentes UI (shadcn/ui)
-│   │   ├── lib/                # Utilidades y configuración
-│   │   └── hooks/              # React hooks personalizados
-│   ├── shared/                 # Esquemas Zod compartidos
-│   ├── package.json
-│   ├── vite.config.ts          # Configuración Vite + proxy
-│   ├── tailwind.config.ts      # Configuración Tailwind CSS
-│   └── tsconfig.json
-├── data.json                   # Base de datos JSON
-├── pom.xml                     # Configuración Maven
-└── README.md
-```
+- ✅ **Interfaz 100% en Español**
+- ✅ **Sistema de Calificaciones Colombiano** (1.0-5.0)
+- ✅ **Actualizaciones en Tiempo Real** (WebSockets)
+- ✅ **Diseño Moderno** (Modo claro/oscuro)
+- ✅ **API REST Completa** (25+ endpoints)
+- ✅ **Validación Robusta** (Frontend y Backend)
 
 ---
 
 ## 🛠️ Tecnologías
 
 ### Backend
-- **Java 17**: Lenguaje principal
-- **Javalin 5.6**: Framework web ligero
-- **Jackson**: Serialización/deserialización JSON
-- **Maven**: Gestión de dependencias
-- **WebSockets**: Comunicación en tiempo real
+- **Java 17** - Lenguaje principal
+- **Javalin 5.6.3** - Framework web ligero
+- **Jackson 2.15.2** - Procesamiento JSON
+- **Maven** - Gestión de dependencias
 
 ### Frontend
-- **React 18**: Biblioteca UI
-- **TypeScript**: Tipado estático
-- **Vite**: Build tool y dev server
-- **Tailwind CSS**: Framework CSS utility-first
-- **shadcn/ui**: Componentes UI modernos
-- **React Query**: Gestión de estado del servidor
-- **Wouter**: Routing ligero
-- **Zod**: Validación de esquemas
-- **React Hook Form**: Gestión de formularios
+- **React 18.3.1** - Biblioteca UI
+- **TypeScript 5.6.3** - Tipado estático
+- **Vite 5.4.20** - Build tool
+- **Tailwind CSS 3.4.17** - Framework CSS
+- **TanStack Query 5.60.5** - Gestión de estado
+- **React Hook Form 7.55.0** - Formularios
+- **Zod 3.24.2** - Validación
 
 ### Base de Datos
-- **JSON**: Almacenamiento en archivo (`data.json`)
-- **ConcurrentHashMap**: Caché en memoria para rendimiento
+- **JSON** (`data.json`) - Almacenamiento portable
+- **ConcurrentHashMap** - Caché en memoria
 
 ---
 
-## 📦 Instalación y Compilación
+## 🚀 Inicio Rápido
 
 ### Prerrequisitos
+
 - Java 17 o superior
 - Maven 3.6+
-- Node.js 18+ y npm
+- Node.js 18+ y npm (solo para desarrollo)
 
-### Compilar Frontend
-
-```bash
-# Desde la raíz del proyecto
-cd client
-npm install
-npm run build
-```
-
-El frontend compilado se genera en `src/main/resources/public/`
-
-### Compilar Backend
+### Opción 1: Ejecutar JAR (Producción)
 
 ```bash
-# Desde la raíz del proyecto
+# 1. Compilar el proyecto
 mvn clean package -DskipTests
-```
 
-Genera el JAR ejecutable en `target/gestion-universitaria-1.0.jar`
-
----
-
-## 🚀 Ejecución
-
-### Modo Producción (JAR único)
-
-```bash
+# 2. Ejecutar la aplicación
 java -jar target/gestion-universitaria-1.0.jar
 ```
 
-Acceder a: **http://localhost:7000**
+**Acceder a**: http://localhost:7000
 
-### Modo Desarrollo (Hot Reload)
+### Opción 2: Modo Desarrollo (Hot Reload)
 
 ```bash
 # Terminal 1 - Backend
 mvn compile exec:java
 
-# Terminal 2 - Frontend (con hot reload)
+# Terminal 2 - Frontend
 cd client
+npm install
 npm run dev
 ```
 
-- Backend: http://localhost:7000
-- Frontend: http://localhost:5173 (con proxy a backend)
+**Acceder a**: http://localhost:5173
 
 ---
 
-## 📡 API REST Endpoints
+## 📁 Estructura del Proyecto
 
-### Estudiantes
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/students` | Listar todos los estudiantes |
-| POST | `/api/students` | Crear nuevo estudiante |
-| PATCH | `/api/students/{id}` | Actualizar estudiante |
-| DELETE | `/api/students/{id}` | Eliminar estudiante |
-
-### Profesores
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/professors` | Listar todos los profesores |
-| POST | `/api/professors` | Crear nuevo profesor |
-| PATCH | `/api/professors/{id}` | Actualizar profesor |
-| DELETE | `/api/professors/{id}` | Eliminar profesor |
-
-### Cursos
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/courses` | Listar todos los cursos |
-| POST | `/api/courses` | Crear nuevo curso |
-| PATCH | `/api/courses/{id}` | Actualizar curso |
-| DELETE | `/api/courses/{id}` | Eliminar curso |
-
-### Inscripciones
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/enrollments` | Listar todas las inscripciones |
-| POST | `/api/enrollments` | Crear nueva inscripción |
-| PATCH | `/api/enrollments/{id}` | Actualizar inscripción |
-| DELETE | `/api/enrollments/{id}` | Eliminar inscripción |
-
-### Calificaciones
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/grades` | Listar todas las calificaciones |
-| POST | `/api/grades` | Crear nueva calificación |
-| PATCH | `/api/grades/{id}` | Actualizar calificación |
-| DELETE | `/api/grades/{id}` | Eliminar calificación |
-
-### Reportes
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/boletin/{id}` | Obtener boletín de estudiante |
-| GET | `/api/reporte/resumen` | Resumen general del sistema |
-
-### WebSocket
-| Ruta | Descripción |
-|------|-------------|
-| WS `/api/ws` | Conexión WebSocket para actualizaciones en tiempo real |
+```
+Proyecto Gestion Universitaria/
+├── src/main/java/              # Backend Java
+│   ├── app/Main.java           # Punto de entrada
+│   ├── controllers/            # 6 controladores REST
+│   ├── models/                 # 5 modelos de datos
+│   └── utils/                  # DataStore y validación
+├── client/                     # Frontend React + TypeScript
+│   ├── src/pages/              # 6 páginas principales
+│   ├── src/components/         # Componentes UI
+│   └── src/shared/             # Esquemas Zod
+├── data.json                   # Base de datos JSON
+└── pom.xml                     # Configuración Maven
+```
 
 ---
 
-## 🎓 Sistema de Calificaciones Colombiano
+## 🎓 Sistema de Calificaciones
 
-### Escala Numérica (1.0 - 5.0)
+Escala colombiana (1.0 - 5.0):
 
 | Letra | Valor | Rango | Descripción |
 |-------|-------|-------|-------------|
-| A | 5.0 | ≥ 4.5 | Excelente |
-| B | 4.5 | 4.0 - 4.4 | Sobresaliente |
-| C | 4.0 | 3.0 - 3.9 | Aceptable |
-| D | 3.0 | 2.0 - 2.9 | Insuficiente |
-| F | 1.0 | < 2.0 | Reprobado |
+| **A** | 5.0 | ≥ 90% | Excelente |
+| **B** | 4.5 | 80-89% | Sobresaliente |
+| **C** | 4.0 | 70-79% | Aceptable |
+| **D** | 3.0 | 60-69% | Insuficiente |
+| **F** | 1.0-2.9 | < 60% | Reprobado |
 
-### Implementación
+**Nota mínima aprobatoria**: 3.0 (60%)
 
-La conversión de calificaciones se realiza en el frontend (`reports.tsx`):
+---
 
-```typescript
-const calculateColombianGrade = (grade: number): number => {
-  if (grade >= 90) return 5.0;
-  if (grade >= 80) return 4.5;
-  if (grade >= 70) return 4.0;
-  if (grade >= 60) return 3.0;
-  return 1.0 + (grade / 60) * 2.0;
-};
+## 🌐 API REST
+
+### Endpoints Principales
+
+| Recurso | GET | POST | PATCH | DELETE |
+|---------|-----|------|-------|--------|
+| `/api/students` | ✅ Listar | ✅ Crear | ✅ Actualizar | ✅ Eliminar |
+| `/api/professors` | ✅ Listar | ✅ Crear | ✅ Actualizar | ✅ Eliminar |
+| `/api/courses` | ✅ Listar | ✅ Crear | ✅ Actualizar | ✅ Eliminar |
+| `/api/enrollments` | ✅ Listar | ✅ Crear | ✅ Actualizar | ✅ Eliminar |
+| `/api/grades` | ✅ Listar | ✅ Crear | ✅ Actualizar | ✅ Eliminar |
+
+### Reportes
+- `GET /api/boletin/{id}` - Boletín de estudiante
+- `GET /api/reporte/resumen` - Resumen general
+
+### WebSocket
+- `WS /api/ws` - Actualizaciones en tiempo real
+
+---
+
+## 🏗️ Arquitectura
+
 ```
+┌─────────────────┐         ┌─────────────────┐         ┌──────────┐
+│    FRONTEND     │  HTTP   │     BACKEND     │         │  DATOS   │
+│ (Interfaz Web)  │ ◄─────► │   (Servidor)    │ ◄─────► │ (Archivo)│
+│ React + TS      │         │ Java + Javalin  │         │ JSON     │
+└─────────────────┘         └─────────────────┘         └──────────┘
+        ▲                            │
+        └────────────────────────────┘
+           Actualizaciones en Tiempo Real
+                  (WebSocket)
+```
+
+**3 Capas**:
+1. **Presentación**: React + TypeScript + Tailwind CSS
+2. **Aplicación**: Java + Javalin (API REST + WebSocket)
+3. **Datos**: JSON + ConcurrentHashMap (caché en memoria)
+
+---
+
+## ⚡ Funcionalidades
+
+### 1. Gestión de Estudiantes
+- CRUD completo
+- Búsqueda avanzada
+- Validación de datos
+- Estados (activo, inactivo, graduado)
+
+### 2. Gestión de Profesores
+- CRUD completo
+- Departamentos y especialización
+- Asignación a cursos
+
+### 3. Gestión de Cursos
+- CRUD completo
+- Código único, créditos, capacidad
+- Horarios y aulas
+- Asignación de profesor
+
+### 4. Inscripciones
+- Inscribir estudiantes en cursos
+- Validación de capacidad
+- Estados (inscrito, completado, retirado)
+
+### 5. Calificaciones
+- Registro de calificaciones
+- Conversión automática a escala colombiana
+- Cálculo de promedios
+
+### 6. Reportes y Analítica
+- Dashboard con estadísticas
+- Distribución de calificaciones
+- Gráficos y visualizaciones
 
 ---
 
@@ -273,16 +226,16 @@ server: {
 
 ### Puerto 7000 ocupado
 
+**Windows**:
 ```bash
-# Windows
 netstat -ano | findstr :7000
 taskkill /PID <PID> /F
-
-# Linux/Mac
-lsof -ti:7000 | xargs kill -9
 ```
 
-O cambiar el puerto en `Main.java`
+**Linux/Mac**:
+```bash
+lsof -ti:7000 | xargs kill -9
+```
 
 ### Error al compilar frontend
 
@@ -300,23 +253,26 @@ Verificar versión (debe ser 17+):
 java -version
 ```
 
-### Datos no se guardan
-
-Verificar permisos de escritura en `data.json`
-
 ---
 
 ## 📚 Documentación Adicional
 
-- **Documentación Técnica**: Ver `DOCUMENTACION_TECNICA.txt`
-- **Presentación del Código**: Ver `PRESENTACION_CODIGO.txt`
+- **[PRESENTACION_PROYECTO.txt](PRESENTACION_PROYECTO.txt)** - Documentación completa para presentación
+- **[DOCUMENTACION_TECNICA.txt](DOCUMENTACION_TECNICA.txt)** - Detalles técnicos del sistema
+- **[PRESENTACION_CODIGO.txt](PRESENTACION_CODIGO.txt)** - Explicación detallada del código
 
 ---
 
-## 🔗 Enlaces Útiles
+## 🔗 Repositorio
 
-- [Javalin Documentation](https://javalin.io/)
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Vite](https://vitejs.dev/)
+**GitHub**: https://github.com/Marlejito/Gestion-Universitaria
+
+---
+
+## 📝 Licencia
+
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+
+---
+
+**¡Gracias por revisar este proyecto!** 🎓
