@@ -257,7 +257,6 @@ java -version
 
 ## 📚 Documentación Adicional
 
-- **[PRESENTACION_PROYECTO.txt](PRESENTACION_PROYECTO.txt)** - Documentación completa para presentación
 - **[DOCUMENTACION_TECNICA.txt](DOCUMENTACION_TECNICA.txt)** - Detalles técnicos del sistema
 - **[PRESENTACION_CODIGO.txt](PRESENTACION_CODIGO.txt)** - Explicación detallada del código
 
